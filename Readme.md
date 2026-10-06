@@ -7,7 +7,7 @@ Multi-agent research and competitive analysis platform. A user submits a natural
 | Folder | Purpose |
 |---|---|
 | `api/` | Backend (Python, FastAPI, LangGraph, DeepAgents) |
-| `app/` | Frontend (Next.js) |
+| `app/` | Frontend (Next.js, TypeScript, Tailwind) |
 | `assignment/` | Original assignment brief (read-only reference, do not edit) |
 | `planning/` | [Implementation plan](planning/plan.md) and [task tracker](planning/task.md) |
 
@@ -38,3 +38,15 @@ uv run pytest
 Add dependencies with `uv add <package>`.
 
 Docker Compose setup will be added in Phase 0 (tasks 0.4–0.8).
+
+## Running the frontend locally (without Docker)
+
+```bash
+cd app
+npm install
+npm run dev      # http://localhost:3000
+npm run lint
+npm run build
+```
+
+The frontend is Next.js (App Router, TypeScript, Tailwind CSS, `src/` layout).

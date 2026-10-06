@@ -15,7 +15,7 @@
 
 | Phase | Total | TODO | IN PROGRESS | COMPLETED |
 |---|---|---|---|---|
-| 0. Setup and foundations | 15 | 14 | 0 | 1 |
+| 0. Setup and foundations | 15 | 13 | 0 | 2 |
 | 1. Context engineering layer | 5 | 5 | 0 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 6 | 0 | 0 |
@@ -36,7 +36,7 @@
 |---|---|---|---|---|---|
 | 0.1 | Groq smoke test: `deepagents` agent with one `task` subagent call (tool calling works) | TODO | | | |
 | 0.2 | Scaffold `api/` (uv, `pyproject.toml` + `uv.lock`, FastAPI skeleton) | COMPLETED | 2026-10-06 17:51 | 2026-10-06 17:53 | Local venv uses Python 3.12; health test passes. Migrated pip to uv on 2026-10-06 23:29 (plan v1.3) |
-| 0.3 | Scaffold `app/` (Next.js 14+, TypeScript, App Router) | TODO | | | |
+| 0.3 | Scaffold `app/` (Next.js 14+, TypeScript, App Router) | COMPLETED | 2026-10-06 23:39 | 2026-10-06 23:45 | Next.js 16.3.8, React 19, Tailwind 4, src/ dir, npm. Lint and build pass. `npm audit` reports 5 high issues in dev lint tooling (braces via eslint-config-next); not forced |
 | 0.4 | `api/Dockerfile` (python:3.11-slim, uv with `uv sync --frozen`, WeasyPrint system libs, CPU-only torch) | TODO | | | |
 | 0.5 | `app/Dockerfile` (node:20-alpine, dev and multi-stage prod) | TODO | | | |
 | 0.6 | `.dockerignore` files for `api/` and `app/` | TODO | | | |
