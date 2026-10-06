@@ -1,7 +1,7 @@
 # Implementation Plan: InsightForge AI Market Intelligence Engine
 
-**Version:** 1.2
-**Source:** [assignment_04_market_intelligence.md](assignment_04_market_intelligence.md)
+**Version:** 1.3
+**Source:** [assignment_04_market_intelligence.md](../assignment/assignment_04_market_intelligence.md)
 **Task tracking:** [task.md](task.md)
 
 ## Changelog
@@ -11,6 +11,7 @@
 | 1.0 | 2026-10-06 | Initial approved plan. Decisions: Groq LLM, SerpAPI, embedded `qdrant_client`, SQLite. |
 | 1.1 | 2026-10-06 | Qdrant switched from embedded local mode to server mode via `QDRANT_URL` (Docker Compose for local dev, matches prior projects; Qdrant Cloud also works). Added per-role model config, LLM concurrency limit, Groq smoke test as first task, SQLite WAL mode. Removed the embedded single-process risk. |
 | 1.2 | 2026-10-06 | Whole project containerized: Docker Compose runs `qdrant`, `api`, and `app`. Added Dockerfiles, `.dockerignore`, healthchecks, and container networking. Task tracking moved from `todo_task.md` to `task.md` (status + datetime log). |
+| 1.3 | 2026-10-06 | Python tooling switched from `pip`/`venv`/`requirements.txt` to **uv** with `api/pyproject.toml` + `api/uv.lock`. Docker build uses uv with `--frozen` for reproducible, cached installs. |
 
 > Any change to this plan is made by bumping the version above and adding a changelog row. Do not silently edit past decisions.
 
@@ -29,6 +30,7 @@
 | LLM concurrency | Semaphore (`LLM_MAX_CONCURRENCY`, default 3) + exponential backoff on 429 | Keeps parallel researchers under Groq rate limits. |
 | Embeddings | Local sentence-transformers model (configurable) | Used for Qdrant chunks, entities, and fact-check similarity. |
 | Backend | FastAPI + `sse-starlette` | In `api/`. |
+| Python tooling | **uv** (`pyproject.toml` + `uv.lock`) | `uv sync`, `uv run`, `uv add`. Same lockfile used locally and in Docker. |
 | Frontend | Next.js 14+ App Router | In `app/`. |
 | Orchestration | LangGraph state machine + `deepagents` Planner | |
 | Scheduler | APScheduler | |
@@ -57,13 +59,15 @@ market_intelligence_engine/
 │   ├── routes/               # research, watchlist, reports
 │   ├── db/                   # SQLAlchemy models + session
 │   ├── tests/
-│   └── requirements.txt
+│   ├── pyproject.toml
+│   └── uv.lock
 ├── app/                      # Next.js frontend
 │   └── Dockerfile
 ├── data/                     # runtime data (gitignored): qdrant/, sqlite, scratch/, model cache
 ├── docker-compose.yml        # qdrant + api + app
 ├── .dockerignore
-├── planning/                 # plan.md, task.md, assignment
+├── assignment/               # original assignment brief (read-only)
+├── planning/                 # plan.md, task.md
 ├── samples/                  # 5 sample briefs + expected structure
 ├── evaluation/               # eval scripts + report
 ├── .env.example
@@ -77,7 +81,7 @@ market_intelligence_engine/
 
 ### Phase 0: Setup and foundations
 - **First task: Groq smoke test.** Confirm the chosen Groq model handles tool calling in a `deepagents` agent with one `task` subagent call. If flaky, pick another model before building anything.
-- Scaffold `api/` (Python 3.11+, venv, `requirements.txt`) and `app/` (`create-next-app`, TypeScript, App Router).
+- Scaffold `api/` (Python 3.11+, uv, `pyproject.toml` + `uv.lock`) and `app/` (`create-next-app`, TypeScript, App Router).
 - Docker setup (see section 3a): `api/Dockerfile`, `app/Dockerfile`, `.dockerignore`, and `docker-compose.yml` with `qdrant`, `api`, `app`.
 - `.env.example` with: `GROQ_API_KEY`, `LLM_PROVIDER`, per-role `*_MODEL` vars, `LLM_MAX_CONCURRENCY`, `SERPAPI_API_KEY`, `SEARCH_PROVIDER`, `QDRANT_URL`, `QDRANT_API_KEY` (optional), `DATABASE_URL`, `EVIDENCE_TOKEN_BUDGET`, `MAX_PARALLEL_SUBTASKS`, `JWT_SECRET`, `LANGSMITH_*` (optional).
 - `config.py` using `pydantic-settings`.
@@ -90,9 +94,10 @@ market_intelligence_engine/
 | Service | Image / build | Ports | Notes |
 |---|---|---|---|
 | `qdrant` | `qdrant/qdrant` | 6333, 6334 | Volume `./data/qdrant:/qdrant/storage`. Healthcheck on `/readyz`. |
-| `api` | `./api/Dockerfile` (python:3.11-slim) | 8000 | `depends_on: qdrant (service_healthy)`. Installs system libs for WeasyPrint (pango/cairo). Volumes: `./data:/app/data` (SQLite, scratch, HF model cache). Env: `QDRANT_URL=http://qdrant:6333`, `DATABASE_URL=sqlite:////app/data/insightforge.db`. |
+| `api` | `./api/Dockerfile` (python:3.11-slim + uv) | 8000 | `depends_on: qdrant (service_healthy)`. Installs system libs for WeasyPrint (pango/cairo). Volumes: `./data:/app/data` (SQLite, scratch, HF model cache). Env: `QDRANT_URL=http://qdrant:6333`, `DATABASE_URL=sqlite:////app/data/insightforge.db`. |
 | `app` | `./app/Dockerfile` (node:20-alpine, multi-stage for prod) | 3000 | `NEXT_PUBLIC_API_URL=http://localhost:8000` (browser-side calls). Depends on `api`. |
 
+- **uv in Docker:** copy the `uv` binary from `ghcr.io/astral-sh/uv`; copy `pyproject.toml` + `uv.lock` first and run `uv sync --frozen --no-install-project` so the dependency layer is cached; then copy source. Set `UV_COMPILE_BYTECODE=1` and `UV_LINK_MODE=copy`. Keep the host `.venv` out of the bind mount (`.dockerignore` + anonymous volume at `/app/.venv`). CPU-only torch via a `[[tool.uv.index]]` PyTorch CPU index when torch is added.
 - **Secrets:** read from `.env` via `env_file`; `.env` is gitignored and `.env.example` is committed. No keys in images.
 - **Dev vs prod:** `docker-compose.yml` is dev (bind mounts, `uvicorn --reload`, `next dev`). A `docker-compose.prod.yml` override (optional) uses built images with no bind mounts.
 - **Single API process:** the scheduler runs inside the `api` container; run one API worker so scheduled jobs don't fire twice.
@@ -167,7 +172,7 @@ Phases 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Multi-agent architectu
 | Groq rate limits during parallel research | Concurrency semaphore, retry with backoff, small token budget, configurable per-role models |
 | Groq model weak at tool calling or long outputs | Smoke test first in Phase 0; per-role model config lets us move the Writer to Claude/GPT |
 | Docker not available on reviewer's machine | Non-Docker run path documented; Qdrant Cloud URL works with no code change |
-| Large `api` image / slow first build (Docling, torch) | CPU-only torch, layer caching (requirements before source), model cache volume |
+| Large `api` image / slow first build (Docling, torch) | CPU-only torch, layer caching (`pyproject.toml` + `uv.lock` before source), model cache volume |
 | Container-to-container vs browser URLs mixed up | `QDRANT_URL` uses service name `qdrant`; `NEXT_PUBLIC_API_URL` uses `localhost:8000` |
 | SQLite "database is locked" | WAL mode, short write transactions |
 | Paywalled or unparseable pages | Skip and log; request top-N+buffer results |

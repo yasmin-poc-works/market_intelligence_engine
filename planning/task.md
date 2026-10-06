@@ -1,7 +1,7 @@
 # Task Tracker: InsightForge AI Market Intelligence Engine
 
-**Based on:** [plan.md](plan.md) v1.2
-**Assignment:** [assignment_04_market_intelligence.md](assignment_04_market_intelligence.md)
+**Based on:** [plan.md](plan.md) v1.3
+**Assignment:** [assignment_04_market_intelligence.md](../assignment/assignment_04_market_intelligence.md)
 
 ## How to use this file
 
@@ -15,7 +15,7 @@
 
 | Phase | Total | TODO | IN PROGRESS | COMPLETED |
 |---|---|---|---|---|
-| 0. Setup and foundations | 15 | 15 | 0 | 0 |
+| 0. Setup and foundations | 15 | 14 | 0 | 1 |
 | 1. Context engineering layer | 5 | 5 | 0 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 6 | 0 | 0 |
@@ -35,9 +35,9 @@
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
 | 0.1 | Groq smoke test: `deepagents` agent with one `task` subagent call (tool calling works) | TODO | | | |
-| 0.2 | Scaffold `api/` (Python venv, `requirements.txt`, FastAPI skeleton) | TODO | | | |
+| 0.2 | Scaffold `api/` (uv, `pyproject.toml` + `uv.lock`, FastAPI skeleton) | COMPLETED | 2026-10-06 17:51 | 2026-10-06 17:53 | Local venv uses Python 3.12; health test passes. Migrated pip to uv on 2026-10-06 23:29 (plan v1.3) |
 | 0.3 | Scaffold `app/` (Next.js 14+, TypeScript, App Router) | TODO | | | |
-| 0.4 | `api/Dockerfile` (python:3.11-slim, WeasyPrint system libs, CPU-only torch) | TODO | | | |
+| 0.4 | `api/Dockerfile` (python:3.11-slim, uv with `uv sync --frozen`, WeasyPrint system libs, CPU-only torch) | TODO | | | |
 | 0.5 | `app/Dockerfile` (node:20-alpine, dev and multi-stage prod) | TODO | | | |
 | 0.6 | `.dockerignore` files for `api/` and `app/` | TODO | | | |
 | 0.7 | `docker-compose.yml`: `qdrant`, `api`, `app` with healthcheck, volumes, `env_file` | TODO | | | |
