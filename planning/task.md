@@ -1,6 +1,6 @@
 # Task Tracker: InsightForge AI Market Intelligence Engine
 
-**Based on:** [plan.md](plan.md) v1.3
+**Based on:** [plan.md](plan.md) v1.4
 **Assignment:** [assignment_04_market_intelligence.md](../assignment/assignment_04_market_intelligence.md)
 
 ## How to use this file
@@ -15,7 +15,7 @@
 
 | Phase | Total | TODO | IN PROGRESS | COMPLETED |
 |---|---|---|---|---|
-| 0. Setup and foundations | 15 | 13 | 0 | 2 |
+| 0. Setup and foundations | 17 | 14 | 1 | 2 |
 | 1. Context engineering layer | 5 | 5 | 0 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 6 | 0 | 0 |
@@ -49,6 +49,8 @@
 | 0.13 | Define SQLite models (Run, TaskGraphLog, Report, WatchlistItem, Alert, SessionSummary) with WAL mode | TODO | | | |
 | 0.14 | Update `.gitignore` for `data/`, SQLite, Qdrant volume storage | TODO | | | |
 | 0.15 | Update `Readme.md` with project structure and Docker setup | TODO | | | |
+| 0.16 | GitHub Actions CI: API tests (uv + pytest) and app lint/build on push and PR to `main` | IN PROGRESS | 2026-10-07 00:03 | | |
+| 0.17 | Extend CI with Docker build check (`docker compose config` and `build`) after 0.7 | TODO | | | |
 
 ## Phase 1: Context engineering layer
 

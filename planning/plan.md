@@ -1,6 +1,6 @@
 # Implementation Plan: InsightForge AI Market Intelligence Engine
 
-**Version:** 1.3
+**Version:** 1.4
 **Source:** [assignment_04_market_intelligence.md](../assignment/assignment_04_market_intelligence.md)
 **Task tracking:** [task.md](task.md)
 
@@ -12,6 +12,7 @@
 | 1.1 | 2026-10-06 | Qdrant switched from embedded local mode to server mode via `QDRANT_URL` (Docker Compose for local dev, matches prior projects; Qdrant Cloud also works). Added per-role model config, LLM concurrency limit, Groq smoke test as first task, SQLite WAL mode. Removed the embedded single-process risk. |
 | 1.2 | 2026-10-06 | Whole project containerized: Docker Compose runs `qdrant`, `api`, and `app`. Added Dockerfiles, `.dockerignore`, healthchecks, and container networking. Task tracking moved from `todo_task.md` to `task.md` (status + datetime log). |
 | 1.3 | 2026-10-06 | Python tooling switched from `pip`/`venv`/`requirements.txt` to **uv** with `api/pyproject.toml` + `api/uv.lock`. Docker build uses uv with `--frozen` for reproducible, cached installs. |
+| 1.4 | 2026-10-07 | Added CI/CD with GitHub Actions (`.github/workflows/ci.yml`): API tests (uv + pytest) and app lint/build on every push and PR to `main`. Docker build check and Qdrant-backed integration tests to be added as Docker and Qdrant code lands. |
 
 > Any change to this plan is made by bumping the version above and adding a changelog row. Do not silently edit past decisions.
 
@@ -35,6 +36,7 @@
 | Orchestration | LangGraph state machine + `deepagents` Planner | |
 | Scheduler | APScheduler | |
 | PDF export | WeasyPrint (fallback: Playwright) | |
+| CI/CD | **GitHub Actions** | Workflow `.github/workflows/ci.yml` runs on push and PR to `main`. See section 3b. |
 
 **Groq caveat:** the free tier has rate and token limits, so parallel researchers use the concurrency semaphore plus retry/backoff, and the 6,000-token evidence budget helps keep prompts small. The chosen model must support tool calling, which `deepagents` requires. A smoke test (one `deepagents` agent making one `task` subagent call) is the first task in Phase 0, so problems surface on day one.
 
@@ -66,6 +68,7 @@ market_intelligence_engine/
 ├── data/                     # runtime data (gitignored): qdrant/, sqlite, scratch/, model cache
 ├── docker-compose.yml        # qdrant + api + app
 ├── .dockerignore
+├── .github/workflows/ci.yml  # CI pipeline
 ├── assignment/               # original assignment brief (read-only)
 ├── planning/                 # plan.md, task.md
 ├── samples/                  # 5 sample briefs + expected structure
@@ -88,6 +91,7 @@ market_intelligence_engine/
 - Pydantic schemas for every agent boundary: `ResearchBrief`, `SubTask`, `TaskGraph`, `SourceRecord`, `SourceRef`, `EntityGraph`, `EvidenceItem`, `EvidenceBundle`, `Report`, `FactCheckSummary`, `DiffSummary`, `RunState`.
 - SQLite models: `Run`, `TaskGraphLog`, `Report`, `WatchlistItem`, `Alert`, `SessionSummary`. WAL mode enabled at connection time.
 - Update `.gitignore` for `data/`, SQLite files, and Qdrant volume storage.
+- CI pipeline with GitHub Actions (see section 3b).
 
 #### 3a. Docker design
 
@@ -103,6 +107,21 @@ market_intelligence_engine/
 - **Single API process:** the scheduler runs inside the `api` container; run one API worker so scheduled jobs don't fire twice.
 - **Image weight:** Docling and sentence-transformers make the `api` image large. Mitigations: `--no-cache-dir`, CPU-only torch wheel, model cache volume so models download once.
 - **Running without Docker** remains possible (`uvicorn` and `npm run dev` with `QDRANT_URL` pointing at a local or Cloud Qdrant), documented in the README as a fallback.
+
+#### 3b. CI/CD (GitHub Actions)
+
+Workflow: `.github/workflows/ci.yml`, triggered on push and pull request to `main`, with concurrency cancellation of superseded runs and read-only permissions.
+
+| Job | Steps |
+|---|---|
+| `api` | checkout, install uv (cached on `api/uv.lock`), `uv python install 3.12`, `uv sync --frozen`, `uv run pytest -q` |
+| `app` | checkout, Node 22 with npm cache, `npm ci`, `npm run lint`, `npm run build` |
+
+Planned additions, added when the pieces exist:
+- **Docker job:** `docker compose config` and `docker compose build` to validate the Dockerfiles and Compose file (after tasks 0.4 to 0.7).
+- **Integration tests:** Qdrant as a service container for tests that need the vector DB (Phase 2).
+- **Secrets:** tests must not call Groq or SerpAPI. LLM and search calls are mocked, so CI needs no API keys. Any live-API evaluation runs manually, not in CI.
+- Optionally make the `CI` check required on `main` via branch protection once it is stable.
 
 ### Phase 1: Context engineering layer (build first)
 - **Scratch store:** keyed store (`write_source` returns `source_id`; `read_source(source_id)`), backed by files under `data/scratch/` or the DeepAgents virtual filesystem. Raw content never lives only in conversation history.
