@@ -1,11 +1,11 @@
 # Task Tracker: InsightForge AI Market Intelligence Engine
 
-**Based on:** [plan.md](plan.md) v1.4
+**Based on:** [plan.md](plan.md) v1.5
 **Assignment:** [assignment_04_market_intelligence.md](../assignment/assignment_04_market_intelligence.md)
 
 ## How to use this file
 
-- **Status values:** `TODO` → `IN PROGRESS` → `COMPLETED`
+- **Status values:** `TODO` → `IN PROGRESS` → `COMPLETED`, or `CANCELLED` when a task is dropped by a plan change (ID kept so history stays traceable)
 - When you start a task: set Status to `IN PROGRESS` and fill **Started** (`YYYY-MM-DD HH:MM`).
 - When you finish: set Status to `COMPLETED` and fill **Completed**.
 - Leave Started/Completed empty until they happen. Add a note in the Notes column for blockers or decisions.
@@ -13,18 +13,18 @@
 
 ## Progress summary
 
-| Phase | Total | TODO | IN PROGRESS | COMPLETED |
-|---|---|---|---|---|
-| 0. Setup and foundations | 17 | 14 | 0 | 3 |
-| 1. Context engineering layer | 5 | 5 | 0 | 0 |
-| 2. Researcher agents | 9 | 9 | 0 | 0 |
-| 3. Planner and orchestration | 6 | 6 | 0 | 0 |
-| 4. Synthesis, Writer, Fact-Checker | 6 | 6 | 0 | 0 |
-| 5. FastAPI backend | 7 | 7 | 0 | 0 |
-| 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 |
-| 7. Next.js frontend | 6 | 6 | 0 | 0 |
-| 8. Evaluation and deliverables | 7 | 7 | 0 | 0 |
-| 9. Bonus (optional) | 8 | 8 | 0 | 0 |
+| Phase | Total | TODO | IN PROGRESS | COMPLETED | CANCELLED |
+|---|---|---|---|---|---|
+| 0. Setup and foundations | 17 | 8 | 0 | 3 | 6 |
+| 1. Context engineering layer | 5 | 5 | 0 | 0 | 0 |
+| 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
+| 3. Planner and orchestration | 6 | 6 | 0 | 0 | 0 |
+| 4. Synthesis, Writer, Fact-Checker | 6 | 6 | 0 | 0 | 0 |
+| 5. FastAPI backend | 7 | 7 | 0 | 0 | 0 |
+| 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 | 0 |
+| 7. Next.js frontend | 6 | 6 | 0 | 0 | 0 |
+| 8. Evaluation and deliverables | 7 | 7 | 0 | 0 | 0 |
+| 9. Bonus (optional) | 8 | 7 | 0 | 0 | 1 |
 
 *Update these counts when statuses change.*
 
@@ -37,20 +37,20 @@
 | 0.1 | Groq smoke test: `deepagents` agent with one `task` subagent call (tool calling works) | TODO | | | |
 | 0.2 | Scaffold `api/` (uv, `pyproject.toml` + `uv.lock`, FastAPI skeleton) | COMPLETED | 2026-10-06 17:51 | 2026-10-06 17:53 | Local venv uses Python 3.12; health test passes. Migrated pip to uv on 2026-10-06 23:29 (plan v1.3) |
 | 0.3 | Scaffold `app/` (Next.js 14+, TypeScript, App Router) | COMPLETED | 2026-10-06 23:39 | 2026-10-06 23:45 | Next.js 16.3.8, React 19, Tailwind 4, src/ dir, npm. Lint and build pass. `npm audit` reports 5 high issues in dev lint tooling (braces via eslint-config-next); not forced |
-| 0.4 | `api/Dockerfile` (python:3.11-slim, uv with `uv sync --frozen`, WeasyPrint system libs, CPU-only torch) | TODO | | | |
-| 0.5 | `app/Dockerfile` (node:20-alpine, dev and multi-stage prod) | TODO | | | |
-| 0.6 | `.dockerignore` files for `api/` and `app/` | TODO | | | |
-| 0.7 | `docker-compose.yml`: `qdrant`, `api`, `app` with healthcheck, volumes, `env_file` | TODO | | | |
-| 0.8 | Verify `docker compose up --build` starts all three services | TODO | | | |
-| 0.9 | Create `.env.example` with all keys and settings | TODO | | | |
-| 0.10 | Implement `config.py` (pydantic-settings) | TODO | | | |
+| 0.4 | `api/Dockerfile` (python:3.11-slim, uv with `uv sync --frozen`, WeasyPrint system libs, CPU-only torch) | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
+| 0.5 | `app/Dockerfile` (node:20-alpine, dev and multi-stage prod) | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
+| 0.6 | `.dockerignore` files for `api/` and `app/` | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
+| 0.7 | `docker-compose.yml`: `qdrant`, `api`, `app` with healthcheck, volumes, `env_file` | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
+| 0.8 | Verify `docker compose up --build` starts all three services | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
+| 0.9 | Create `.env.example` with all keys and settings | TODO | | | Include `QDRANT_PATH` (embedded, default) and `QDRANT_URL` (optional, Cloud/standalone) |
+| 0.10 | Implement `config.py` (pydantic-settings) | TODO | | | Qdrant client factory: `QDRANT_URL` if set, else embedded at `QDRANT_PATH` |
 | 0.11 | LLM concurrency semaphore + 429 backoff helper; per-role model config | TODO | | | |
 | 0.12 | Define Pydantic schemas for all agent boundaries | TODO | | | |
 | 0.13 | Define SQLite models (Run, TaskGraphLog, Report, WatchlistItem, Alert, SessionSummary) with WAL mode | TODO | | | |
-| 0.14 | Update `.gitignore` for `data/`, SQLite, Qdrant volume storage | TODO | | | |
-| 0.15 | Update `Readme.md` with project structure and Docker setup | TODO | | | |
+| 0.14 | Update `.gitignore` for `data/`, SQLite, local Qdrant storage | TODO | | | |
+| 0.15 | Update `Readme.md` with project structure and local (no Docker) setup | TODO | | | |
 | 0.16 | GitHub Actions CI: API tests (uv + pytest) and app lint/build on push and PR to `main` | COMPLETED | 2026-10-07 00:03 | 2026-10-07 00:05 | First run passed: https://github.com/yasmin-poc-works/market_intelligence_engine/actions/runs/37512334244 |
-| 0.17 | Extend CI with Docker build check (`docker compose config` and `build`) after 0.7 | TODO | | | |
+| 0.17 | Extend CI with Docker build check (`docker compose config` and `build`) after 0.7 | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |
 
 ## Phase 1: Context engineering layer
 
@@ -136,7 +136,7 @@
 |---|---|---|---|---|---|
 | 8.1 | Write 5 sample briefs with expected report structure in `samples/` | TODO | | | |
 | 8.2 | Evaluation script and report (pass rate, citation accuracy, synthesis quality) | TODO | | | |
-| 8.3 | README: setup (Docker and non-Docker), API keys, env vars, architecture diagram | TODO | | | |
+| 8.3 | README: local setup (uv, npm, Qdrant), API keys, env vars, architecture diagram | TODO | | | |
 | 8.4 | README: context-engineering writeup with real blowout example from run logs | TODO | | | |
 | 8.5 | README: sample report and end-to-end walkthrough | TODO | | | |
 | 8.6 | Record 5–7 minute demo | TODO | | | |
@@ -153,4 +153,4 @@
 | 9.5 | Entity graph visualizer | TODO | | | |
 | 9.6 | Source credibility tuning | TODO | | | |
 | 9.7 | Multi-language research | TODO | | | |
-| 9.8 | Optional: `docker-compose.prod.yml` override (built images, no bind mounts) | TODO | | | |
+| 9.8 | Optional: `docker-compose.prod.yml` override (built images, no bind mounts) | CANCELLED | | 2026-10-07 14:59 | Docker dropped (plan v1.5): project runs locally |

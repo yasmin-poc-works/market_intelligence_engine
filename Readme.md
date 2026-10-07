@@ -15,18 +15,18 @@ Multi-agent research and competitive analysis platform. A user submits a natural
 
 - LLM: Groq (configurable; Claude or GPT-4o can be swapped in)
 - Web search: SerpAPI
-- Vector DB: Qdrant server via `qdrant_client` and `QDRANT_URL` (runs in Docker Compose; a Qdrant Cloud URL also works)
+- Vector DB: Qdrant via `qdrant_client`, embedded local mode by default (`QDRANT_PATH`); set `QDRANT_URL` to use Qdrant Cloud or a standalone server
 - Database: SQLite (WAL mode)
 - Python tooling: uv (`pyproject.toml` + `uv.lock`)
-- Runtime: the whole stack (`qdrant`, `api`, `app`) runs via Docker Compose
+- Runtime: runs locally, no Docker (`api` with uvicorn, `app` with `next dev`)
 
 ## Status
 
-Planning complete (plan v1.3). Implementation has started (Phase 0: setup). See [planning/task.md](planning/task.md).
+Planning complete (plan v1.5). Implementation has started (Phase 0: setup). See [planning/task.md](planning/task.md).
 
 Setup instructions, API keys, and the context-engineering writeup will be added as the build progresses.
 
-## Running the API locally (without Docker)
+## Running the API locally
 
 ```bash
 cd api
@@ -37,9 +37,9 @@ uv run pytest
 
 Add dependencies with `uv add <package>`.
 
-Docker Compose setup will be added in Phase 0 (tasks 0.4–0.8).
+Qdrant runs embedded inside the API process (data in `data/qdrant`), so there is nothing else to start. Run a single API worker. Environment variables (`.env.example`) will be documented as they are added.
 
-## Running the frontend locally (without Docker)
+## Running the frontend locally
 
 ```bash
 cd app
