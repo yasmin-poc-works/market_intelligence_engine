@@ -74,3 +74,23 @@ def test_non_429_not_retried():
 
     with pytest.raises(ValueError):
         asyncio.run(llm.call_llm(boom, max_retries=3))
+
+
+def test_tool_call_failure_retried_then_succeeds():
+    calls = []
+
+    async def glitchy():
+        calls.append(1)
+        if len(calls) < 3:
+            raise RuntimeError("Error code: 400 - tool_use_failed")
+        return "ok"
+
+    assert asyncio.run(llm.call_llm(glitchy)) == "ok"
+
+
+def test_tool_call_failure_gives_up_after_limit():
+    async def always():
+        raise RuntimeError("tool_use_failed")
+
+    with pytest.raises(RuntimeError):
+        asyncio.run(llm.call_llm(always))

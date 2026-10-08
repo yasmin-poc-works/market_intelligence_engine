@@ -18,7 +18,7 @@
 | 0. Setup and foundations | 17 | 0 | 0 | 11 | 6 |
 | 1. Context engineering layer | 5 | 0 | 0 | 5 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
-| 3. Planner and orchestration | 6 | 6 | 0 | 0 | 0 |
+| 3. Planner and orchestration | 6 | 0 | 0 | 6 | 0 |
 | 4. Synthesis, Writer, Fact-Checker | 6 | 6 | 0 | 0 | 0 |
 | 5. FastAPI backend | 7 | 7 | 0 | 0 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 | 0 |
@@ -80,12 +80,12 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 3.1 | Planner with `create_deep_agent()` and `write_todos` | TODO | | | |
-| 3.2 | Typed `TaskGraph` output (3–6 sub-tasks, configurable cap of 6) | TODO | | | |
-| 3.3 | Vague-brief detection with single clarifying question | TODO | | | |
-| 3.4 | Spawn isolated researcher subagents via `task` tool (references only) | TODO | | | |
-| 3.5 | LangGraph state machine with typed state and parallel join | TODO | | | |
-| 3.6 | Persist task graph and status events to DB | TODO | | | |
+| 3.1 | Planner with `create_deep_agent()` and `write_todos` | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | `api/agents/planner.py`: `create_deep_agent` (built-in `write_todos`), verified live on Groq. Needs `ToolStrategy` because Groq rejects JSON mode together with tools |
+| 3.2 | Typed `TaskGraph` output (3–6 sub-tasks, configurable cap of 6) | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | `TaskGraph` (3-6) built from `PlannerOutput`; cap = `MAX_PARALLEL_SUBTASKS` (max 6); one retry with feedback if < 3 |
+| 3.3 | Vague-brief detection with single clarifying question | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | Briefs under 4 words ask without an LLM call; LLM may ask too; question cut to one; never asked again after `clarification` is supplied |
+| 3.4 | Spawn isolated researcher subagents via `task` tool (references only) | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | `api/agents/researchers.py`: fresh isolated deep agent per sub-task (own sub-task only), returns `SourceRef`s (summary max 300 chars). Run directly by the graph, not through a `task` tool call, to keep parallelism and typed output; tools registry `RESEARCHER_TOOLS` filled in Phase 2 |
+| 3.5 | LangGraph state machine with typed state and parallel join | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | `api/graph/pipeline.py`: LangGraph with `Send` fan-out, join barrier, per-branch failure isolation; synthesize/write/fact_check are injectable placeholders until Phase 4 |
+| 3.6 | Persist task graph and status events to DB | COMPLETED | 2026-10-09 01:50 | 2026-10-09 02:05 | `api/graph/events.py` `EventRecorder`: task graph, subtask and status events in `TaskGraphLog`, `Run.status` updated; `list_events(after_id)` for SSE |
 
 ## Phase 4: Synthesis, Writer, Fact-Checker
 

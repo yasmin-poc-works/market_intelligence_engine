@@ -62,7 +62,7 @@ class SourceRef(BaseModel):
     """What a researcher returns instead of content."""
 
     source_id: str
-    summary: str
+    summary: str = Field(max_length=300)  # one line; raw content never travels between agents
     kind: Literal["web", "document_chunk", "entity"] = "web"
     url: str | None = None
 
