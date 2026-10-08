@@ -54,6 +54,7 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 | `api/config.py` | Settings and Qdrant client factory |
 | `api/llm.py` | LLM concurrency semaphore and 429 backoff (`call_llm`) |
 | `api/schemas/` | Pydantic models for every agent boundary |
+| `api/context/` | Scratch store, token budget (`fit_to_budget`), run log, session memory, summarizer |
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
 | `api/agents/`, `context/`, `graph/`, `routes/`, `scheduler/` | Planned modules (see task tracker) |
 

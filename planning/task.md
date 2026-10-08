@@ -16,7 +16,7 @@
 | Phase | Total | TODO | IN PROGRESS | COMPLETED | CANCELLED |
 |---|---|---|---|---|---|
 | 0. Setup and foundations | 17 | 0 | 0 | 11 | 6 |
-| 1. Context engineering layer | 5 | 5 | 0 | 0 | 0 |
+| 1. Context engineering layer | 5 | 0 | 0 | 5 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 6 | 0 | 0 | 0 |
 | 4. Synthesis, Writer, Fact-Checker | 6 | 6 | 0 | 0 | 0 |
@@ -56,11 +56,11 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 1.1 | Scratch store (`write_source`, `read_source`) | TODO | | | |
-| 1.2 | Token counter and `fit_to_budget` with compress-not-truncate | TODO | | | |
-| 1.3 | Run log recording cuts, reasons, and token counts per boundary | TODO | | | |
-| 1.4 | Memory store loading last 3 compressed session summaries | TODO | | | |
-| 1.5 | Enable auto-summarization for long sessions | TODO | | | |
+| 1.1 | Scratch store (`write_source`, `read_source`) | COMPLETED | 2026-10-09 01:45 | 2026-10-09 02:05 | `api/context/scratch_store.py`: JSON files under `data/scratch/`, id validated against path traversal |
+| 1.2 | Token counter and `fit_to_budget` with compress-not-truncate | COMPLETED | 2026-10-09 01:45 | 2026-10-09 02:05 | `api/context/token_budget.py`: tiktoken count (offline fallback); compress lowest priority first, drop whole items only as last resort, never truncate |
+| 1.3 | Run log recording cuts, reasons, and token counts per boundary | COMPLETED | 2026-10-09 01:45 | 2026-10-09 02:05 | `api/context/run_log.py`: per-boundary tokens and cuts with reasons; saved to `Run.run_log` |
+| 1.4 | Memory store loading last 3 compressed session summaries | COMPLETED | 2026-10-09 01:45 | 2026-10-09 02:05 | `api/context/memory_store.py`: last 3 summaries oldest first; over-long ones compressed on save |
+| 1.5 | Enable auto-summarization for long sessions | COMPLETED | 2026-10-09 01:45 | 2026-10-09 02:05 | `create_deep_agent` enables deepagents SummarizationMiddleware by default; `api/context/summarizer.py` provides the Groq summarizer for compression |
 
 ## Phase 2: Researcher agents
 
