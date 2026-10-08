@@ -37,7 +37,25 @@ uv run pytest
 
 Add dependencies with `uv add <package>`.
 
-Qdrant runs embedded inside the API process (data in `data/qdrant`), so there is nothing else to start. Run a single API worker. Environment variables (`.env.example`) will be documented as they are added.
+Qdrant runs embedded inside the API process (data in `data/qdrant`), so there is nothing else to start. Run a single API worker.
+
+### Configuration
+
+```bash
+cp .env.example .env     # repo root; fill in GROQ_API_KEY and SERPAPI_API_KEY
+```
+
+Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDRANT_PATH`, `DATABASE_URL`, `SCRATCH_PATH`) resolve against the repo root, and all runtime data lands in the gitignored `data/` folder. Set `QDRANT_URL` (and `QDRANT_API_KEY`) to use Qdrant Cloud or a standalone server instead of embedded storage. Per-role models (`PLANNER_MODEL`, `WRITER_MODEL`, ...) fall back to `LLM_MODEL` when empty.
+
+### Backend layout
+
+| Path | Purpose |
+|---|---|
+| `api/config.py` | Settings and Qdrant client factory |
+| `api/llm.py` | LLM concurrency semaphore and 429 backoff (`call_llm`) |
+| `api/schemas/` | Pydantic models for every agent boundary |
+| `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
+| `api/agents/`, `context/`, `graph/`, `routes/`, `scheduler/` | Planned modules (see task tracker) |
 
 ## Running the frontend locally
 

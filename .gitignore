@@ -96,6 +96,10 @@ data/
 *.db
 *.sqlite
 *.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
 
 # ---------- Logs ----------
 *.log
