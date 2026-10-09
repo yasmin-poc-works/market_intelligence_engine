@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy import select
 
+from db.models import Report as ReportRow
 from db.models import Run, TaskGraphLog
 from db.session import SessionLocal
 
@@ -45,3 +46,27 @@ class EventRecorder:
                     .order_by(TaskGraphLog.id)
                 )
             )
+
+    def save_run_log(self, run_id: str, run_log) -> None:
+        with self._sf() as db:
+            run = db.get(Run, run_id)
+            if run is None:
+                raise KeyError(f"run not found: {run_id}")
+            run.run_log = [*(run.run_log or []), *run_log.to_dicts()]
+            db.commit()
+
+    def save_report(self, run_id: str, report, fact_check=None) -> str:
+        with self._sf() as db:
+            row = ReportRow(
+                id=report.id,
+                run_id=run_id,
+                title=report.title[:300],
+                markdown=report.markdown,
+                data={
+                    "report": report.model_dump(mode="json"),
+                    "fact_check": fact_check.model_dump(mode="json") if fact_check else None,
+                },
+            )
+            db.merge(row)
+            db.commit()
+            return row.id

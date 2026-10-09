@@ -19,7 +19,7 @@
 | 1. Context engineering layer | 5 | 0 | 0 | 5 | 0 |
 | 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 0 | 0 | 6 | 0 |
-| 4. Synthesis, Writer, Fact-Checker | 6 | 6 | 0 | 0 | 0 |
+| 4. Synthesis, Writer, Fact-Checker | 6 | 0 | 0 | 6 | 0 |
 | 5. FastAPI backend | 7 | 7 | 0 | 0 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 | 0 |
 | 7. Next.js frontend | 6 | 6 | 0 | 0 | 0 |
@@ -91,12 +91,12 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 4.1 | Synthesis Agent: resolve refs, dedupe, confidence levels, ranking | TODO | | | |
-| 4.2 | Synthesis Agent: enforce evidence token budget (default 6,000) | TODO | | | |
-| 4.3 | Writer Agent: report structure with citations and confidence labels | TODO | | | |
-| 4.4 | Writer Agent: grounding check with retry on unsupported claims | TODO | | | |
-| 4.5 | Fact-Checker Agent: 20% sampling (min 5), similarity ≥ 0.85 check | TODO | | | |
-| 4.6 | Fact-Checker Agent: `[UNVERIFIED]` marking and summary output | TODO | | | |
+| 4.1 | Synthesis Agent: resolve refs, dedupe, confidence levels, ranking | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | `api/agents/synthesis.py`: resolves refs (scratch; Qdrant chunks via injectable `chunk_lookup`, wired in Phase 2), extracts claims, dedupes, HIGH = 2+ distinct domains, MEDIUM = single source with credibility >= 0.7, LOW otherwise or conflicting; ranks recency > credibility > relevance. Verified live on Groq |
+| 4.2 | Synthesis Agent: enforce evidence token budget (default 6,000) | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | Budget from `EVIDENCE_TOKEN_BUDGET` (default 6000) via `fit_to_budget`; lowest-ranked claims compressed first; cuts logged to `Run.run_log` |
+| 4.3 | Writer Agent: report structure with citations and confidence labels | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | `api/agents/writer.py`: LLM cites evidence as `[E#]`, code resolves to `[Source: domain, date, credibility: x]`; exec summary <= 150 words; one section per task-graph sub-task; section confidence = lowest cited; Gaps & limitations. Verified live on Groq |
+| 4.4 | Writer Agent: grounding check with retry on unsupported claims | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | Per-sentence grounding check (citation present, id exists, figures appear in cited evidence); up to 2 retries with explicit violations; persistent unsupported sentences removed and noted in gaps |
+| 4.5 | Fact-Checker Agent: 20% sampling (min 5), similarity ≥ 0.85 check | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | `api/agents/fact_checker.py`: 20% sample (min 5), re-fetch source, passages embedded into in-memory Qdrant, cosine >= 0.85. `sentence-transformers` installed (CPU-only torch index). Real-model check: correct claims score ~0.79-0.82 and wrong ones ~0.63, so the 0.85 threshold would flag correct claims; decision pending |
+| 4.6 | Fact-Checker Agent: `[UNVERIFIED]` marking and summary output | COMPLETED | 2026-10-09 14:20 | 2026-10-09 15:00 | `[UNVERIFIED]` appended to sentences citing failed claims; `FactCheckSummary` returned and rendered; report persisted to `reports` table on completion |
 
 ## Phase 5: FastAPI backend
 

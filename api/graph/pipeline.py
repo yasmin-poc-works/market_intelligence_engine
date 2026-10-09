@@ -35,6 +35,9 @@ class GraphState(TypedDict, total=False):
     subtask_status: Annotated[dict[str, str], _merge]
     errors: Annotated[list[str], operator.add]
     evidence: Any
+    sources: dict[str, dict]
+    draft: Any
+    entity_graph: Any
     report: Any
     fact_check: Any
     error: str | None
@@ -125,6 +128,8 @@ def build_graph(deps: PipelineDeps):
         return lambda state: END if state.get("status") == RunStatus.FAILED else next_node
 
     async def complete(state: GraphState) -> dict[str, Any]:
+        if state.get("report") is not None:
+            rec.save_report(state["run_id"], state["report"], state.get("fact_check"))
         rec.set_status(state["run_id"], RunStatus.COMPLETE)
         return {"status": RunStatus.COMPLETE}
 

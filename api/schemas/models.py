@@ -89,6 +89,7 @@ class EntityGraph(BaseModel):
 
 
 class EvidenceItem(BaseModel):
+    id: str = ""  # E1, E2, ... in rank order; the writer cites claims by this id
     claim: str
     source_ids: list[str] = Field(min_length=1)
     confidence: Confidence

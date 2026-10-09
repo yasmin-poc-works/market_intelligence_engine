@@ -55,7 +55,7 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 | `api/llm.py` | LLM concurrency semaphore and 429 backoff (`call_llm`) |
 | `api/schemas/` | Pydantic models for every agent boundary |
 | `api/context/` | Scratch store, token budget (`fit_to_budget`), run log, session memory, summarizer |
-| `api/agents/` | Planner and researcher runners |
+| `api/agents/` | Planner, researcher runner, synthesis, writer, fact-checker |
 | `api/graph/` | LangGraph pipeline and run/status event recorder |
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
 | `api/routes/`, `api/scheduler/` | Planned modules (see task tracker) |

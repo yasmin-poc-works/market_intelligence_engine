@@ -8,6 +8,7 @@ from context.run_log import Cut, RunLog
 Summarizer = Callable[[str, int], str]  # (text, target_tokens) -> shorter text
 
 MIN_SUMMARY_TOKENS = 30
+NL = chr(10)
 
 _encoder = None
 _encoder_failed = False
@@ -95,3 +96,37 @@ def fit_to_budget(
     if run_log is not None:
         run_log.record(boundary, tokens_in, total_tokens(result), budget=budget, cuts=cuts)
     return result
+
+
+def split_by_tokens(text: str, max_tokens: int) -> list[str]:
+    """Split on paragraph/line boundaries into pieces of at most max_tokens (oversized
+    single lines are split on words). Nothing is dropped."""
+    pieces: list[str] = []
+    cur: list[str] = []
+    cur_tokens = 0
+
+    def flush() -> None:
+        nonlocal cur, cur_tokens
+        if cur:
+            pieces.append(NL.join(cur))
+            cur, cur_tokens = [], 0
+
+    for line in text.split(NL):
+        t = count_tokens(line)
+        if t > max_tokens:
+            flush()
+            words, buf = line.split(" "), []
+            for w in words:
+                if buf and count_tokens(" ".join(buf + [w])) > max_tokens:
+                    pieces.append(" ".join(buf))
+                    buf = []
+                buf.append(w)
+            if buf:
+                pieces.append(" ".join(buf))
+            continue
+        if cur_tokens + t > max_tokens:
+            flush()
+        cur.append(line)
+        cur_tokens += t
+    flush()
+    return pieces
