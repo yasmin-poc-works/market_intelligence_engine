@@ -47,6 +47,20 @@ cp .env.example .env     # repo root; fill in GROQ_API_KEY and SERPAPI_API_KEY
 
 Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDRANT_PATH`, `DATABASE_URL`, `SCRATCH_PATH`) resolve against the repo root, and all runtime data lands in the gitignored `data/` folder. Set `QDRANT_URL` (and `QDRANT_API_KEY`) to use Qdrant Cloud or a standalone server instead of embedded storage. Per-role models (`PLANNER_MODEL`, `WRITER_MODEL`, ...) fall back to `LLM_MODEL` when empty.
 
+### API endpoints
+
+| Method and path | Purpose |
+|---|---|
+| `POST /research/run` | Start a run (multipart form: `brief`, `files` up to 10 PDFs of 20 MB, `include_web`, `include_documents`, `clarification`) |
+| `GET /research/runs/{id}` | Run status, error, clarifying question, `report_id` |
+| `GET /research/status/{id}` | Server-sent events for live progress (supports `Last-Event-ID`) |
+| `GET/POST /watchlist`, `GET/PATCH/DELETE /watchlist/{id}` | Watchlist CRUD |
+| `GET /reports`, `GET /reports/{id}` | List and retrieve reports |
+| `GET /reports/{id}/export.md`, `export.pdf` | Downloads |
+| `POST /reports/{id}/share`, `GET /share/{token}` | 7-day signed share link and its public read-only view |
+
+Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` in `.env` before sharing links. Interactive docs are at `/docs`.
+
 ### Backend layout
 
 | Path | Purpose |
@@ -57,8 +71,9 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 | `api/context/` | Scratch store, token budget (`fit_to_budget`), run log, session memory, summarizer |
 | `api/agents/` | Planner, researcher runner, synthesis, writer, fact-checker |
 | `api/graph/` | LangGraph pipeline and run/status event recorder |
+| `api/routes/`, `api/services/` | HTTP endpoints (research, watchlist, reports, share) and their helpers (uploads, export, share tokens, run executor) |
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
-| `api/routes/`, `api/scheduler/` | Planned modules (see task tracker) |
+| `api/scheduler/` | Planned module (Phase 6) |
 
 ## Running the frontend locally
 

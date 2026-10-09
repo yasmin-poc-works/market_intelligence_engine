@@ -20,7 +20,7 @@
 | 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
 | 3. Planner and orchestration | 6 | 0 | 0 | 6 | 0 |
 | 4. Synthesis, Writer, Fact-Checker | 6 | 0 | 0 | 6 | 0 |
-| 5. FastAPI backend | 7 | 7 | 0 | 0 | 0 |
+| 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 | 0 |
 | 7. Next.js frontend | 6 | 6 | 0 | 0 | 0 |
 | 8. Evaluation and deliverables | 7 | 7 | 0 | 0 | 0 |
@@ -102,13 +102,13 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 5.1 | `POST /research/run` and PDF upload (≤10 files, ≤20 MB) | TODO | | | |
-| 5.2 | `GET /research/status` (SSE) | TODO | | | |
-| 5.3 | `/watchlist` CRUD | TODO | | | |
-| 5.4 | `/reports` list and retrieve | TODO | | | |
-| 5.5 | Export: `.md` and PDF | TODO | | | |
-| 5.6 | JWT share link (7-day expiry) | TODO | | | |
-| 5.7 | Error handling and CORS | TODO | | | |
+| 5.1 | `POST /research/run` and PDF upload (≤10 files, ≤20 MB) | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `POST /research/run` (multipart: brief, PDFs, toggles, optional clarification) returns 202 + run_id, runs the pipeline as a background task; `GET /research/runs/{id}` for status. PDFs: max 10 files (422), 20 MB each (413), `%PDF` magic check (415), names sanitized, stored under `data/uploads/{run_id}/`. Last 3 session summaries are loaded into the planner; a summary is saved after each completed run |
+| 5.2 | `GET /research/status` (SSE) | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `GET /research/status/{run_id}` SSE (sse-starlette): replays all events then streams live, honours `Last-Event-ID`, ends at a terminal status |
+| 5.3 | `/watchlist` CRUD | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `/watchlist` POST/GET/GET one/PATCH/DELETE; daily/weekly, http(s) webhook only, `next_run` set on create and frequency change |
+| 5.4 | `/reports` list and retrieve | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `GET /reports` (limit/offset/total) and `GET /reports/{id}` |
+| 5.5 | Export: `.md` and PDF | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `/reports/{id}/export.md` and `export.pdf` (fpdf2, pure Python: no GTK/WeasyPrint system libs on Windows; Latin-1 core fonts so non-Latin text becomes `?`) |
+| 5.6 | JWT share link (7-day expiry) | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | `POST /reports/{id}/share` returns a 7-day HS256 JWT (scope `report:read`, one report); `GET /share/{token}` is public read-only. Expired/tampered/foreign tokens give 401 |
+| 5.7 | Error handling and CORS | COMPLETED | 2026-10-09 15:07 | 2026-10-09 15:50 | Uniform `{"error": {code, message, details?}}` envelope for HTTP, validation and unhandled errors (500 never leaks internals); CORS from `CORS_ORIGINS`, exposes `Content-Disposition` |
 
 ## Phase 6: Scheduler and Diff Agent
 

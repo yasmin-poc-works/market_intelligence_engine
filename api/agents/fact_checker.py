@@ -5,6 +5,7 @@ import math
 import random
 import re
 from collections.abc import Awaitable, Callable
+from functools import lru_cache
 from typing import Protocol
 
 from qdrant_client import QdrantClient, models
@@ -36,6 +37,11 @@ class SentenceTransformerEmbedder:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         return self._model.encode(texts, normalize_embeddings=True).tolist()
+
+
+@lru_cache
+def default_embedder() -> Embedder:
+    return SentenceTransformerEmbedder()
 
 
 async def fetch_page_text(url: str) -> str:
@@ -128,7 +134,7 @@ def make_fact_check_stage(embedder: Embedder | None = None, refetch: Refetch = f
     """Pipeline stage: state -> {"fact_check", "report"} with [UNVERIFIED] marks applied."""
 
     async def stage(state: dict) -> dict:
-        emb = embedder or SentenceTransformerEmbedder()
+        emb = embedder or default_embedder()
         summary, failed = await fact_check(
             state["draft"], state["evidence"], state["sources"], state["run_id"], refetch=refetch, embedder=emb
         )

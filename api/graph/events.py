@@ -37,6 +37,11 @@ class EventRecorder:
             db.add(TaskGraphLog(run_id=run_id, event="status", payload={"status": status, "error": error}))
             db.commit()
 
+    def get_status(self, run_id: str) -> str | None:
+        with self._sf() as db:
+            run = db.get(Run, run_id)
+            return run.status if run else None
+
     def list_events(self, run_id: str, after_id: int = 0) -> list[TaskGraphLog]:
         with self._sf() as db:
             return list(

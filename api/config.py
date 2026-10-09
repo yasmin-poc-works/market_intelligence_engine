@@ -50,8 +50,13 @@ class Settings(BaseSettings):
     evidence_token_budget: int = Field(6000, gt=0)
     max_parallel_subtasks: int = Field(6, ge=1, le=6)
 
+    # Web
+    frontend_url: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000"  # comma-separated
+    upload_path: str = "data/uploads"
+
     # Auth
-    jwt_secret: str = "change-me"
+    jwt_secret: str = "b9bXOmdO5JnJtKI5Af1d_Wb3Z9w3ooCiI3SCNRkRydzy0la-RrRtbv38_rihxeC-"
 
     # Observability
     langsmith_tracing: bool = False
@@ -74,6 +79,14 @@ class Settings(BaseSettings):
     @property
     def qdrant_dir(self) -> Path:
         return _resolve(self.qdrant_path)
+
+    @property
+    def upload_dir(self) -> Path:
+        return _resolve(self.upload_path)
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def scratch_dir(self) -> Path:
