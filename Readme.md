@@ -79,6 +79,10 @@ Errors always use `{"error": {"code", "message", "details"?}}`. There is no user
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
 | `api/scheduler/` | APScheduler runner: one interval job per active watchlist item, then diff, alert and webhook |
 
+## Sample briefs
+
+Five example briefs with the expected report structure for each are in [samples/](samples/README.md).
+
 ## Running the frontend locally
 
 ```bash

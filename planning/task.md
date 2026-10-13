@@ -23,7 +23,7 @@
 | 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 0 | 0 | 4 | 0 |
 | 7. Next.js frontend | 6 | 0 | 0 | 6 | 0 |
-| 8. Evaluation and deliverables | 7 | 7 | 0 | 0 | 0 |
+| 8. Evaluation and deliverables | 7 | 6 | 0 | 1 | 0 |
 | 9. Bonus (optional) | 8 | 7 | 0 | 0 | 1 |
 
 *Update these counts when statuses change.*
@@ -134,7 +134,7 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 8.1 | Write 5 sample briefs with expected report structure in `samples/` | TODO | | | |
+| 8.1 | Write 5 sample briefs with expected report structure in `samples/` | COMPLETED | 2026-10-13 22:20 | 2026-10-13 22:35 | `samples/briefs.json` (machine-readable, for task 8.2) and `samples/README.md` (documentation): 5 briefs of 500 characters or less across SaaS, healthcare, EV batteries, retail regulation and finance, covering five question types, each with expected sub-tasks, section structure, must-cover topics and watch-outs. The PDF brief needs evaluator-supplied annual reports (not in the repo). `api/tests/test_samples.py` checks the files stay valid and in sync |
 | 8.2 | Evaluation script and report (pass rate, citation accuracy, synthesis quality) | TODO | | | |
 | 8.3 | README: local setup (uv, npm, Qdrant), API keys, env vars, architecture diagram | TODO | | | |
 | 8.4 | README: context-engineering writeup with real blowout example from run logs | TODO | | | |

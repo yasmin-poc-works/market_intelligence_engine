@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "common_expectations": {
+    "executive_summary_max_words": 150,
+    "one_section_per_subtask": true,
+    "each_section_has_confidence_label": true,
+    "citation_format": "[Source: domain, date, credibility: x.xx]",
+    "required_closing_sections": ["Gaps & limitations"],
+    "fact_check_pass_rate_target": 0.8,
+    "subtask_count": [3, 6]
+  },
+  "briefs": [
+    {
+      "id": "payroll-sea",
+      "title": "B2B payroll software in Southeast Asia",
+      "industry": "SaaS / HR tech",
+      "question_type": "competitive landscape",
+      "brief": "Summarize the competitive landscape for B2B payroll software in Southeast Asia. Focus on pricing, recent funding, and product gaps. Cover the last 18 months and name the main regional and global vendors.",
+      "include_web": true,
+      "include_documents": false,
+      "documents": [],
+      "time_horizon": "last 18 months",
+      "expected_subtasks": [
+        "Main vendors and market positioning",
+        "Pricing models and price points",
+        "Recent funding and M&A",
+        "Product gaps and unmet customer needs"
+      ],
+      "expected_sections": [
+        "Executive Summary",
+        "Main vendors and market positioning",
+        "Pricing models and price points",
+        "Recent funding and M&A",
+        "Product gaps and unmet customer needs",
+        "Gaps & limitations"
+      ],
+      "must_cover": ["pricing", "funding", "Singapore", "Indonesia", "compliance", "competitor names"],
+      "notes": "Example brief from the assignment. Funding figures should carry dates and a source; pricing is often not public, which belongs in Gaps & limitations rather than being guessed."
+    },
+    {
+      "id": "ai-imaging-eu",
+      "title": "AI diagnostic imaging in Europe",
+      "industry": "Healthcare / medical devices",
+      "question_type": "market sizing and trends",
+      "brief": "How large is the European market for AI-assisted diagnostic imaging (radiology), and how fast is it growing? Cover adoption by hospitals, the CE marking and EU MDR regulatory burden, and the leading vendors. Prefer sources from the last 2 years.",
+      "include_web": true,
+      "include_documents": false,
+      "documents": [],
+      "time_horizon": "last 2 years",
+      "expected_subtasks": [
+        "Market size and growth estimates",
+        "Hospital adoption and reimbursement",
+        "Regulatory path (CE marking, EU MDR, AI Act)",
+        "Leading vendors and recent deals"
+      ],
+      "expected_sections": [
+        "Executive Summary",
+        "Market size and growth estimates",
+        "Hospital adoption and reimbursement",
+        "Regulatory path (CE marking, EU MDR, AI Act)",
+        "Leading vendors and recent deals",
+        "Gaps & limitations"
+      ],
+      "must_cover": ["market size", "CAGR or growth rate", "MDR", "reimbursement", "vendor names"],
+      "notes": "Tests conflicting numbers: analyst firms publish different market sizes. The report should flag the conflict with both figures and sources, not average them."
+    },
+    {
+      "id": "catl-profile",
+      "title": "CATL company profile",
+      "industry": "Energy / EV batteries",
+      "question_type": "company deep-dive",
+      "brief": "Profile CATL (Contemporary Amperex Technology): recent capacity expansion, major customers, margins and financial position, technology strategy (sodium-ion, LFP), and the main geopolitical and supply-chain risks. Use sources from the last 12 months.",
+      "include_web": true,
+      "include_documents": false,
+      "documents": [],
+      "time_horizon": "last 12 months",
+      "expected_subtasks": [
+        "Capacity expansion and new plants",
+        "Customers and market share",
+        "Financial performance and margins",
+        "Technology roadmap",
+        "Geopolitical and supply-chain risks"
+      ],
+      "expected_sections": [
+        "Executive Summary",
+        "Capacity expansion and new plants",
+        "Customers and market share",
+        "Financial performance and margins",
+        "Technology roadmap",
+        "Geopolitical and supply-chain risks",
+        "Gaps & limitations"
+      ],
+      "must_cover": ["capacity (GWh)", "market share", "gross margin", "sodium-ion", "tariffs or export controls"],
+      "notes": "Tests the entity extractor (companies, figures, dates) and recency ranking: newer figures must outrank older ones for the same metric."
+    },
+    {
+      "id": "dpp-fashion",
+      "title": "EU Digital Product Passport and fashion retail",
+      "industry": "Retail / fashion",
+      "question_type": "regulatory impact analysis",
+      "brief": "What does the EU Digital Product Passport (ESPR) mean for fashion and apparel retailers? Cover the timeline, the data retailers must provide, expected compliance costs, and how early movers are preparing. Flag anything still undecided.",
+      "include_web": true,
+      "include_documents": false,
+      "documents": [],
+      "time_horizon": "current rules and proposals",
+      "expected_subtasks": [
+        "Regulation scope and timeline",
+        "Data and traceability requirements",
+        "Compliance cost estimates",
+        "Retailer and brand preparation"
+      ],
+      "expected_sections": [
+        "Executive Summary",
+        "Regulation scope and timeline",
+        "Data and traceability requirements",
+        "Compliance cost estimates",
+        "Retailer and brand preparation",
+        "Gaps & limitations"
+      ],
+      "must_cover": ["ESPR", "delegated acts", "timeline", "textiles", "compliance cost"],
+      "notes": "Tests honesty about uncertainty: rules that are not final must be labelled as proposals, and the cost section should be LOW confidence if only a few sources exist."
+    },
+    {
+      "id": "bnpl-annual-reports",
+      "title": "BNPL providers from annual reports",
+      "industry": "Finance / consumer credit",
+      "question_type": "document-grounded comparison",
+      "brief": "Using the uploaded annual reports, compare the buy-now-pay-later providers on revenue growth, credit losses, and stated strategy. Add recent web context on regulation and funding costs, and say where the reports and the web disagree.",
+      "include_web": true,
+      "include_documents": true,
+      "documents": [
+        "2 to 3 annual report PDFs of BNPL or consumer-credit providers (for example Klarna, Affirm, Afterpay/Block), supplied by the evaluator and not stored in the repository"
+      ],
+      "time_horizon": "latest fiscal year in the uploaded reports",
+      "expected_subtasks": [
+        "Revenue growth by provider (from the reports)",
+        "Credit losses and provisioning (from the reports)",
+        "Stated strategy and outlook (from the reports)",
+        "Regulation and funding costs (web)"
+      ],
+      "expected_sections": [
+        "Executive Summary",
+        "Revenue growth by provider (from the reports)",
+        "Credit losses and provisioning (from the reports)",
+        "Stated strategy and outlook (from the reports)",
+        "Regulation and funding costs (web)",
+        "Gaps & limitations"
+      ],
+      "must_cover": ["revenue growth", "credit losses", "provisions", "regulation", "provider names"],
+      "notes": "Tests the PDF path (Doc Reader, Qdrant chunks). Citations for report-sourced claims should point at the uploaded documents; web-sourced claims at web domains. Disagreements between the two must be called out."
+    }
+  ]
+}
