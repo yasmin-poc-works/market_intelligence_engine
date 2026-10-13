@@ -25,6 +25,7 @@ class Api:
 @pytest.fixture
 def api(tmp_path, monkeypatch):
     monkeypatch.setattr("main.init_db", lambda: None)  # tests use their own database
+    monkeypatch.setattr("main.build_scheduler", lambda: None)  # scheduler tests build their own
     eng = make_engine(f"sqlite:///{(tmp_path / 'api.db').as_posix()}")
     Base.metadata.create_all(eng)
     sf = sessionmaker(bind=eng, expire_on_commit=False)

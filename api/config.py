@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     evidence_token_budget: int = Field(6000, gt=0)
     max_parallel_subtasks: int = Field(6, ge=1, le=6)
 
+    # Scheduler (watchlist runs; keep the API at a single worker)
+    scheduler_enabled: bool = True
+
     # Web
     frontend_url: str = "http://localhost:3000"
     cors_origins: str = "http://localhost:3000"  # comma-separated

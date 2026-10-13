@@ -21,7 +21,7 @@
 | 3. Planner and orchestration | 6 | 0 | 0 | 6 | 0 |
 | 4. Synthesis, Writer, Fact-Checker | 6 | 0 | 0 | 6 | 0 |
 | 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
-| 6. Scheduler and Diff Agent | 4 | 4 | 0 | 0 | 0 |
+| 6. Scheduler and Diff Agent | 4 | 0 | 0 | 4 | 0 |
 | 7. Next.js frontend | 6 | 6 | 0 | 0 | 0 |
 | 8. Evaluation and deliverables | 7 | 7 | 0 | 0 | 0 |
 | 9. Bonus (optional) | 8 | 7 | 0 | 0 | 1 |
@@ -114,10 +114,10 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 6.1 | APScheduler watchlist runner (daily/weekly), single API worker | TODO | | | |
-| 6.2 | Diff Agent (added/removed/changed, ignore rephrasing) | TODO | | | |
-| 6.3 | In-app alerts | TODO | | | |
-| 6.4 | Slack-compatible webhook delivery | TODO | | | |
+| 6.1 | APScheduler watchlist runner (daily/weekly), single API worker | COMPLETED | 2026-10-13 20:20 | 2026-10-13 20:55 | `api/scheduler/watchlist.py`: `AsyncIOScheduler` with one interval job per active item, started in the app lifespan (`SCHEDULER_ENABLED`); watchlist create/patch/delete sync the job; `POST /watchlist/{id}/run` runs now. Each run is linked to the item (`runs.watchlist_item_id`); `last_run`/`next_run` persisted even if the run fails |
+| 6.2 | Diff Agent (added/removed/changed, ignore rephrasing) | COMPLETED | 2026-10-13 20:20 | 2026-10-13 20:55 | `api/agents/diff.py`: citation-stripped sentence matching; same figures = rephrasing (ignored), changed figures = changed, unmatched = added/removed; optional LLM judge (`make_llm_judge`) can only drop entries. Material = any changed, added/removed finding with figures, or 3+ added/removed. First run is the baseline |
+| 6.3 | In-app alerts | COMPLETED | 2026-10-13 20:20 | 2026-10-13 20:55 | `Alert` rows created on material change; `GET /alerts` (unread filter, pagination), `POST /alerts/{id}/read`, `POST /alerts/read-all` |
+| 6.4 | Slack-compatible webhook delivery | COMPLETED | 2026-10-13 20:20 | 2026-10-13 20:55 | `api/services/alerts.py`: Slack-compatible `{"text": ...}` POST with report link, 3 attempts with backoff (no retry on 4xx), never raises |
 
 ## Phase 7: Next.js frontend
 

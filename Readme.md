@@ -54,10 +54,14 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 | `POST /research/run` | Start a run (multipart form: `brief`, `files` up to 10 PDFs of 20 MB, `include_web`, `include_documents`, `clarification`) |
 | `GET /research/runs/{id}` | Run status, error, clarifying question, `report_id` |
 | `GET /research/status/{id}` | Server-sent events for live progress (supports `Last-Event-ID`) |
-| `GET/POST /watchlist`, `GET/PATCH/DELETE /watchlist/{id}` | Watchlist CRUD |
+| `GET/POST /watchlist`, `GET/PATCH/DELETE /watchlist/{id}` | Watchlist CRUD (changes sync the scheduler job) |
+| `POST /watchlist/{id}/run` | Run a watchlist item now (202); diff and alert follow as for scheduled runs |
+| `GET /alerts` (`unread_only`, `watchlist_item_id`, `limit`, `offset`), `POST /alerts/{id}/read`, `POST /alerts/read-all` | In-app alerts raised on material changes |
 | `GET /reports`, `GET /reports/{id}` | List and retrieve reports |
 | `GET /reports/{id}/export.md`, `export.pdf` | Downloads |
 | `POST /reports/{id}/share`, `GET /share/{token}` | 7-day signed share link and its public read-only view |
+
+**Watchlist monitoring.** On startup the API schedules every active watchlist item (daily or weekly) in-process, so run it with a single worker. Each run researches the topic, then the Diff Agent compares the new report with the previous one for that item (sentence matching with citations stripped; rephrasing with the same figures is ignored; an LLM judge drops leftover rephrasings). The first run is the baseline. A material change (a changed figure, an added or removed finding with figures, or 3+ added/removed findings) creates an in-app alert and, if the item has a `webhook_url`, POSTs a Slack-compatible `{"text": ...}` message (3 attempts with backoff; failures are logged, never fatal). Set `SCHEDULER_ENABLED=false` to turn the scheduler off.
 
 Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` in `.env` before sharing links. Interactive docs are at `/docs`.
 
@@ -73,7 +77,7 @@ Errors always use `{"error": {"code", "message", "details"?}}`. There is no user
 | `api/graph/` | LangGraph pipeline and run/status event recorder |
 | `api/routes/`, `api/services/` | HTTP endpoints (research, watchlist, reports, share) and their helpers (uploads, export, share tokens, run executor) |
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
-| `api/scheduler/` | Planned module (Phase 6) |
+| `api/scheduler/` | APScheduler runner: one interval job per active watchlist item, then diff, alert and webhook |
 
 ## Running the frontend locally
 

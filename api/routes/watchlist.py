@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 from sqlalchemy import select
 
@@ -41,6 +41,10 @@ class WatchlistOut(BaseModel):
     created_at: datetime
 
 
+def _scheduler(request: Request):
+    return getattr(request.app.state, "scheduler", None)
+
+
 def _get(db, item_id: str) -> WatchlistItem:
     item = db.get(WatchlistItem, item_id)
     if item is None:
@@ -49,7 +53,7 @@ def _get(db, item_id: str) -> WatchlistItem:
 
 
 @router.post("", status_code=201, response_model=WatchlistOut)
-def create_item(body: WatchlistCreate, session_factory=Depends(get_session_factory)):
+def create_item(body: WatchlistCreate, request: Request, session_factory=Depends(get_session_factory)):
     with session_factory() as db:
         item = WatchlistItem(
             topic=body.topic.strip(),
@@ -60,6 +64,8 @@ def create_item(body: WatchlistCreate, session_factory=Depends(get_session_facto
         )
         db.add(item)
         db.commit()
+        if sched := _scheduler(request):
+            sched.sync(item)
         return item
 
 
@@ -76,7 +82,7 @@ def get_item(item_id: str, session_factory=Depends(get_session_factory)):
 
 
 @router.patch("/{item_id}", response_model=WatchlistOut)
-def update_item(item_id: str, body: WatchlistUpdate, session_factory=Depends(get_session_factory)):
+def update_item(item_id: str, body: WatchlistUpdate, request: Request, session_factory=Depends(get_session_factory)):
     with session_factory() as db:
         item = _get(db, item_id)
         data = body.model_dump(exclude_unset=True)
@@ -90,11 +96,27 @@ def update_item(item_id: str, body: WatchlistUpdate, session_factory=Depends(get
             item.frequency = data["frequency"]
             item.next_run = datetime.now(UTC) + INTERVAL[item.frequency]
         db.commit()
+        if sched := _scheduler(request):
+            sched.sync(item)
         return item
 
 
 @router.delete("/{item_id}", status_code=204)
-def delete_item(item_id: str, session_factory=Depends(get_session_factory)):
+def delete_item(item_id: str, request: Request, session_factory=Depends(get_session_factory)):
     with session_factory() as db:
         db.delete(_get(db, item_id))
         db.commit()
+    if sched := _scheduler(request):
+        sched.remove(item_id)
+
+
+@router.post("/{item_id}/run", status_code=202)
+def run_now(item_id: str, request: Request, background: BackgroundTasks, session_factory=Depends(get_session_factory)):
+    """Run a watchlist item immediately (outside its schedule); the diff and alert follow as usual."""
+    with session_factory() as db:
+        _get(db, item_id)
+    sched = _scheduler(request)
+    if sched is None:
+        raise ApiError(503, "Scheduler is disabled", "scheduler_disabled")
+    background.add_task(sched.run_item, item_id)
+    return {"status": "started"}

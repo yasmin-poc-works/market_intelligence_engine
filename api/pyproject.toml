@@ -19,6 +19,7 @@ dependencies = [
     "sentence-transformers>=6.1.0",
     "pyjwt>=2.15.1",
     "fpdf2>=2.8.9",
+    "apscheduler>=3.10,<4.0",
 ]
 
 [dependency-groups]
