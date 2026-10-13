@@ -72,6 +72,7 @@ def get_run(run_id: str, session_factory=Depends(get_session_factory)):
             question = asked[-1].payload.get("question") if asked else None
         return {
             "run_id": run.id,
+            "brief": run.brief,
             "status": run.status,
             "error": run.error,
             "clarifying_question": question,

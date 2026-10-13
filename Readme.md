@@ -89,4 +89,14 @@ npm run lint
 npm run build
 ```
 
-The frontend is Next.js (App Router, TypeScript, Tailwind CSS, `src/` layout).
+The frontend is Next.js (App Router, TypeScript, Tailwind CSS, `src/` layout). It talks to the API at `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`; set it in `app/.env.local`), so start the API first and make sure `CORS_ORIGINS` includes the frontend origin.
+
+| Page | What it does |
+|---|---|
+| `/` | Brief panel: 500-character counter, PDF drag-and-drop (10 files, 20 MB each), web/document toggles, runtime estimate; recent reports |
+| `/runs/[id]` | Live progress over SSE: task rows (Queued/Running/Done/Failed), agent activity log, progress bar, elapsed time; clarifying-question form |
+| `/reports`, `/reports/[id]` | Report viewer: sticky table of contents, clickable citations opening a source drawer, amber `UNVERIFIED` marks, confidence badges, fact-check panel, PDF / `.md` export and 7-day share link |
+| `/share/[token]` | Public read-only view of a shared report |
+| `/watchlist` | Watched topics (add, pause, change frequency, run now, delete), one-click diff view, alert feed |
+
+The citation drawer shows the cited source's title, date, credibility and the claims it supports (the report stores `sources` and `evidence` next to the text).

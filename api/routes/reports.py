@@ -30,6 +30,8 @@ def _detail(row: ReportRow) -> dict:
         "markdown": row.markdown,
         "report": row.data.get("report"),
         "fact_check": row.data.get("fact_check"),
+        "sources": row.data.get("sources") or {},
+        "evidence": row.data.get("evidence") or [],
     }
 
 

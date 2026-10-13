@@ -214,3 +214,11 @@ def test_cors_exposes_download_filename_header(api):
     rid = api.completed_report_id()
     r = api.client.get(f"/reports/{rid}/export.md", headers={"Origin": "http://localhost:3000"})
     assert "content-disposition" in r.headers["access-control-expose-headers"].lower()
+
+
+def test_report_detail_includes_sources_and_evidence_for_citation_drawer(api):
+    body = api.client.get(f"/reports/{api.completed_report_id()}").json()
+    assert body["sources"] and body["evidence"]
+    src = next(iter(body["sources"].values()))
+    assert {"domain", "title", "published_date", "credibility_score"} <= src.keys()
+    assert {"id", "claim", "source_ids"} <= body["evidence"][0].keys()

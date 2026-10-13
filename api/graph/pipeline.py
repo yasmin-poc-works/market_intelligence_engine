@@ -129,7 +129,9 @@ def build_graph(deps: PipelineDeps):
 
     async def complete(state: GraphState) -> dict[str, Any]:
         if state.get("report") is not None:
-            rec.save_report(state["run_id"], state["report"], state.get("fact_check"))
+            rec.save_report(
+                state["run_id"], state["report"], state.get("fact_check"), state.get("sources"), state.get("evidence")
+            )
         rec.set_status(state["run_id"], RunStatus.COMPLETE)
         return {"status": RunStatus.COMPLETE}
 

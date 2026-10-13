@@ -22,7 +22,7 @@
 | 4. Synthesis, Writer, Fact-Checker | 6 | 0 | 0 | 6 | 0 |
 | 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 0 | 0 | 4 | 0 |
-| 7. Next.js frontend | 6 | 6 | 0 | 0 | 0 |
+| 7. Next.js frontend | 6 | 0 | 0 | 6 | 0 |
 | 8. Evaluation and deliverables | 7 | 7 | 0 | 0 | 0 |
 | 9. Bonus (optional) | 8 | 7 | 0 | 0 | 1 |
 
@@ -123,12 +123,12 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 7.1 | Brief input panel (char counter, PDF drag-and-drop, toggles, runtime estimate) | TODO | | | |
-| 7.2 | Live progress view (SSE rows, activity log, progress bar, elapsed time) | TODO | | | |
-| 7.3 | Report viewer (sticky TOC, citation drawer, `[UNVERIFIED]` highlight, badges) | TODO | | | |
-| 7.4 | Fact-check summary panel | TODO | | | |
-| 7.5 | Watchlist dashboard (table, diff view, alert feed) | TODO | | | |
-| 7.6 | Export buttons (PDF, `.md`, share link) | TODO | | | |
+| 7.1 | Brief input panel (char counter, PDF drag-and-drop, toggles, runtime estimate) | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `BriefPanel.tsx`: 500-char counter, PDF drag-and-drop with client-side checks (PDF only, 10 files, 20 MB), web/document toggles, runtime estimate range; also used for the clarification re-submit |
+| 7.2 | Live progress view (SSE rows, activity log, progress bar, elapsed time) | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `RunProgress.tsx` on `/runs/[id]`: `EventSource` on `/research/status/{id}` (deduped by event id, reconnect notice), task rows, activity log, progress bar by stage, elapsed timer, failed and needs-clarification states. API change: `GET /research/runs/{id}` now returns `brief` |
+| 7.3 | Report viewer (sticky TOC, citation drawer, `[UNVERIFIED]` highlight, badges) | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `ReportViewer.tsx`: sticky TOC with scroll-spy, citation chips open a side drawer (title, date, credibility, URL, supported claims), amber `UNVERIFIED` mark with tooltip, green/amber/red confidence badges. API change: report detail now includes `sources` and `evidence`, persisted at completion. The drawer shows extracted claims, not the raw source paragraph (raw bodies are never stored in the report) |
+| 7.4 | Fact-check summary panel | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `FactCheckPanel.tsx`: pass rate vs 80% target, checked/verified/unverified counts, list of unverified claims |
+| 7.5 | Watchlist dashboard (table, diff view, alert feed) | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `WatchlistDashboard.tsx` on `/watchlist`: add form (frequency, webhook), table with inline frequency/active edit, run now, delete, one-click diff (added/removed/changed), alert feed with mark read / mark all read, 30 s polling |
+| 7.6 | Export buttons (PDF, `.md`, share link) | COMPLETED | 2026-10-13 21:10 | 2026-10-13 22:05 | `ExportButtons.tsx`: PDF and `.md` downloads, share link creation with copy and expiry; the public `/share/[token]` page offers a local `.md` download only. `npm run lint` and `npm run build` pass; UI not yet exercised in a browser against a live run (needs Phase 2 researchers) |
 
 ## Phase 8: Evaluation and deliverables
 

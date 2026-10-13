@@ -60,7 +60,7 @@ class EventRecorder:
             run.run_log = [*(run.run_log or []), *run_log.to_dicts()]
             db.commit()
 
-    def save_report(self, run_id: str, report, fact_check=None) -> str:
+    def save_report(self, run_id: str, report, fact_check=None, sources=None, evidence=None) -> str:
         with self._sf() as db:
             row = ReportRow(
                 id=report.id,
@@ -70,6 +70,9 @@ class EventRecorder:
                 data={
                     "report": report.model_dump(mode="json"),
                     "fact_check": fact_check.model_dump(mode="json") if fact_check else None,
+                    # citation drawer: where each cited claim came from
+                    "sources": sources or {},
+                    "evidence": [e.model_dump(mode="json") for e in evidence.items] if evidence else [],
                 },
             )
             db.merge(row)
