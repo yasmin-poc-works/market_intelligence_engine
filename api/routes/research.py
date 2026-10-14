@@ -1,5 +1,6 @@
 import asyncio
 import json
+import shutil
 from pathlib import Path
 from typing import Annotated
 
@@ -9,12 +10,12 @@ from sse_starlette.sse import EventSourceResponse
 
 from db.models import Report as ReportRow
 from db.models import Run
-from deps import DepsFactory, get_deps_factory, get_session_factory, get_upload_dir
+from deps import DepsFactory, get_deps_factory, get_pdf_fetcher, get_session_factory, get_upload_dir
 from errors import ApiError
 from graph.events import TERMINAL, EventRecorder
 from schemas import ResearchBrief
 from services.runner import create_run, execute_run
-from services.uploads import save_pdfs
+from services.uploads import MAX_FILES, PdfFetcher, save_pdf_links, save_pdfs
 
 router = APIRouter(prefix="/research", tags=["research"])
 
@@ -26,14 +27,17 @@ async def start_run(
     background: BackgroundTasks,
     brief: Annotated[str, Form()],
     files: Annotated[list[UploadFile], File()] = [],  # noqa: B006
+    document_urls: Annotated[list[str], Form()] = [],  # noqa: B006
     include_web: Annotated[bool, Form()] = True,
     include_documents: Annotated[bool, Form()] = True,
     clarification: Annotated[str | None, Form()] = None,
     session_factory=Depends(get_session_factory),
     deps_factory: DepsFactory = Depends(get_deps_factory),
     upload_dir: Path = Depends(get_upload_dir),
+    fetch_pdf: PdfFetcher = Depends(get_pdf_fetcher),
 ):
-    """Start a research run (multipart form: brief, optional PDFs, toggles). Returns the run id;
+    """Start a research run (multipart form: brief, optional PDFs and/or `document_urls` links to PDFs,
+    toggles). Linked PDFs are downloaded by the server and handled like uploads. Returns the run id;
     follow progress on GET /research/status/{run_id}."""
     try:
         parsed = ResearchBrief(
@@ -45,12 +49,26 @@ async def start_run(
     except ValidationError as exc:
         raise ApiError(422, exc.errors()[0]["msg"], "validation_error") from None
 
+    links = [u for u in dict.fromkeys(u.strip() for u in document_urls) if u]
+    uploads = [f for f in files if f.filename]
+    if len(uploads) + len(links) > MAX_FILES:
+        raise ApiError(422, f"At most {MAX_FILES} documents (files and links together) are allowed", "too_many_files")
+
     run_id = create_run(session_factory, parsed, [])
-    names = await save_pdfs(files, upload_dir / run_id)
+    dest = upload_dir / run_id
+    try:
+        names = await save_pdfs(uploads, dest)
+        names += await save_pdf_links(links, fetch_pdf, dest, len(names))
+    except ApiError:
+        with session_factory() as db:  # a rejected request must not leave a half-started run behind
+            db.delete(db.get(Run, run_id))
+            db.commit()
+        shutil.rmtree(dest, ignore_errors=True)
+        raise
     if names:
         with session_factory() as db:
             run = db.get(Run, run_id)
-            run.options = {**run.options, "document_ids": names}
+            run.options = {**run.options, "document_ids": names, "document_urls": links}
             db.commit()
         parsed = parsed.model_copy(update={"document_ids": names})
 

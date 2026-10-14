@@ -18,6 +18,12 @@ def get_upload_dir() -> Path:
     return get_settings().upload_dir
 
 
+def get_pdf_fetcher():
+    from services.uploads import fetch_pdf
+
+    return fetch_pdf
+
+
 def get_deps_factory() -> DepsFactory:
     from services.pipeline_factory import build_deps
 

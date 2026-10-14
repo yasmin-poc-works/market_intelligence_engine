@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     writer_model: str | None = None
     fact_check_model: str | None = None
     llm_max_concurrency: int = Field(3, ge=1)
-    llm_max_retries: int = Field(5, ge=0)
+    llm_max_retries: int = Field(8, ge=0)
 
     # Embeddings (fact-check similarity, Qdrant chunks)
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"

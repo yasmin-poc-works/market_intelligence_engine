@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { API_URL, ApiError, errorMessage } from "@/lib/api";
-import { buttonClass, Card, ErrorNote } from "./ui";
+import { buttonClass, Card, ErrorNote, ghostButtonClass } from "./ui";
 
 const MAX_CHARS = 500;
 const MAX_FILES = 10;
@@ -41,6 +41,9 @@ export default function BriefPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileNote, setFileNote] = useState<string | null>(null);
+  const [links, setLinks] = useState<string[]>([]);
+  const [linkInput, setLinkInput] = useState("");
+  const [linkNote, setLinkNote] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function addFiles(list: FileList | File[]) {
@@ -60,14 +63,37 @@ export default function BriefPanel({
     const merged = [...files];
     for (const f of accepted) {
       if (merged.some((m) => m.name === f.name && m.size === f.size)) continue;
-      if (merged.length >= MAX_FILES) {
-        notes.push(`At most ${MAX_FILES} files; ${f.name} was skipped`);
+      if (merged.length + links.length >= MAX_FILES) {
+        notes.push(`At most ${MAX_FILES} documents (files and links); ${f.name} was skipped`);
         continue;
       }
       merged.push(f);
     }
     setFiles(merged);
     setFileNote(notes.length ? notes.join(". ") : null);
+  }
+
+  function addLink() {
+    const value = linkInput.trim();
+    if (!value) return;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      setLinkNote("That is not a valid link. Paste the full address, starting with https://");
+      return;
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      setLinkNote("Only http(s) links are supported");
+    } else if (links.includes(url.href)) {
+      setLinkNote("That link is already added");
+    } else if (files.length + links.length >= MAX_FILES) {
+      setLinkNote(`At most ${MAX_FILES} documents (files and links together)`);
+    } else {
+      setLinks([...links, url.href]);
+      setLinkInput("");
+      setLinkNote(null);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -80,7 +106,10 @@ export default function BriefPanel({
       form.append("include_web", String(includeWeb));
       form.append("include_documents", String(includeDocs));
       if (clarification) form.append("clarification", clarification);
-      if (includeDocs) files.forEach((f) => form.append("files", f));
+      if (includeDocs) {
+        files.forEach((f) => form.append("files", f));
+        links.forEach((u) => form.append("document_urls", u));
+      }
       let res: Response;
       try {
         res = await fetch(`${API_URL}/research/run`, { method: "POST", body: form });
@@ -97,8 +126,9 @@ export default function BriefPanel({
   }
 
   const count = brief.length;
-  const { lo, hi } = estimateMinutes(count, files.length, includeWeb, includeDocs);
-  const canSubmit = brief.trim().length > 0 && count <= MAX_CHARS && (includeWeb || (includeDocs && files.length > 0)) && !busy;
+  const docCount = files.length + links.length;
+  const { lo, hi } = estimateMinutes(count, docCount, includeWeb, includeDocs);
+  const canSubmit = brief.trim().length > 0 && count <= MAX_CHARS && (includeWeb || (includeDocs && docCount > 0)) && !busy;
 
   return (
     <Card>
@@ -172,6 +202,55 @@ export default function BriefPanel({
               />
             </div>
             {fileNote && <p className="mt-2 text-xs text-warn">{fileNote}</p>}
+
+            <div className="mt-4">
+              <label htmlFor="doc-link" className="mb-1 block text-sm font-medium">
+                Or add a link to a PDF
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="doc-link"
+                  type="url"
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addLink();
+                    }
+                  }}
+                  placeholder="https://example.com/annual-report.pdf"
+                  className="min-w-0 flex-1 rounded-md border border-line bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+                />
+                <button type="button" onClick={addLink} disabled={!linkInput.trim()} className={ghostButtonClass}>
+                  Add link
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-muted">
+                No need to download it first. The link must point straight to a PDF and be publicly reachable; the server fetches it
+                when the run starts.
+              </p>
+              {linkNote && <p className="mt-1 text-xs text-warn">{linkNote}</p>}
+              {links.length > 0 && (
+                <ul className="mt-3 space-y-1 text-sm">
+                  {links.map((u) => (
+                    <li key={u} className="flex items-center justify-between rounded border border-line px-3 py-1.5">
+                      <span className="truncate" title={u}>
+                        {u}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLinks(links.filter((x) => x !== u))}
+                        className="ml-3 shrink-0 text-xs text-muted hover:text-bad"
+                        aria-label={`Remove ${u}`}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             {files.length > 0 && (
               <ul className="mt-3 space-y-1 text-sm">
                 {files.map((f) => (
@@ -194,8 +273,8 @@ export default function BriefPanel({
           </div>
         )}
 
-        {!includeWeb && !(includeDocs && files.length > 0) && (
-          <p className="text-xs text-warn">Turn on web search or add at least one PDF.</p>
+        {!includeWeb && !(includeDocs && docCount > 0) && (
+          <p className="text-xs text-warn">Turn on web search or add at least one PDF or PDF link.</p>
         )}
 
         <ErrorNote message={error} />

@@ -1,13 +1,23 @@
-"""PDF upload validation and storage (<= 10 files, <= 20 MB each)."""
+"""PDF upload and PDF-link validation and storage (<= 10 documents in total, <= 20 MB each)."""
+import asyncio
+import ipaddress
 import re
+import socket
+from collections.abc import Awaitable, Callable
 from pathlib import Path
+from urllib.parse import unquote, urljoin, urlparse
 
+import httpx
 from fastapi import UploadFile
 
 from errors import ApiError
 
 MAX_FILES = 10
 MAX_BYTES = 20 * 1024 * 1024
+FETCH_TIMEOUT = 30.0
+MAX_REDIRECTS = 3
+
+PdfFetcher = Callable[[str], Awaitable[bytes]]  # url -> PDF bytes, raises ApiError
 
 
 def safe_name(filename: str | None, index: int) -> str:
@@ -15,6 +25,72 @@ def safe_name(filename: str | None, index: int) -> str:
     stem = base[:-4] if base.lower().endswith(".pdf") else base
     stem = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-") or f"document_{index}"
     return stem + ".pdf"
+
+
+def parse_pdf_url(url: str) -> str:
+    """Normalize a document link; only http(s) links with a host are accepted."""
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        raise ApiError(422, f'"{url[:100]}" is not a valid http(s) link', "invalid_url")
+    return url
+
+
+async def _check_public_host(host: str) -> None:
+    """Refuse links that point at this machine or a private network (server-side request forgery)."""
+    try:
+        infos = await asyncio.get_running_loop().getaddrinfo(host, None, type=socket.SOCK_STREAM)
+    except OSError:
+        raise ApiError(502, f'Could not resolve "{host}"', "fetch_failed") from None
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0].split("%")[0])
+        if not ip.is_global:
+            raise ApiError(422, f'Links to "{host}" are not allowed (private or local address)', "blocked_address")
+
+
+async def fetch_pdf(url: str) -> bytes:
+    """Download a PDF from a public link: redirects re-checked, size capped, content verified."""
+    async with httpx.AsyncClient(timeout=FETCH_TIMEOUT, follow_redirects=False) as client:
+        current = url
+        for _ in range(MAX_REDIRECTS + 1):
+            await _check_public_host(urlparse(current).hostname or "")
+            data = bytearray()
+            try:
+                async with client.stream("GET", current, headers={"Accept": "application/pdf,*/*;q=0.5"}) as resp:
+                    if resp.is_redirect and resp.headers.get("location"):
+                        current = parse_pdf_url(urljoin(current, resp.headers["location"]))
+                        continue
+                    if resp.status_code >= 400:
+                        raise ApiError(502, f'"{url[:100]}" returned HTTP {resp.status_code}', "fetch_failed")
+                    async for chunk in resp.aiter_bytes():
+                        data += chunk
+                        if len(data) > MAX_BYTES:
+                            raise ApiError(
+                                413, f'"{url[:100]}" exceeds the {MAX_BYTES // (1024 * 1024)} MB limit', "file_too_large"
+                            )
+            except httpx.HTTPError:
+                raise ApiError(502, f'Could not download "{url[:100]}"', "fetch_failed") from None
+            if not data.startswith(b"%PDF"):
+                raise ApiError(415, f'"{url[:100]}" is not a direct link to a PDF file', "not_a_pdf")
+            return bytes(data)
+    raise ApiError(502, f'Too many redirects for "{url[:100]}"', "fetch_failed")
+
+
+def name_from_url(url: str, index: int) -> str:
+    return safe_name(unquote(Path(urlparse(url).path).name) or None, index)
+
+
+async def save_pdf_links(urls: list[str], fetcher: PdfFetcher, dest: Path, start_index: int) -> list[str]:
+    """Fetch each linked PDF and store it next to the uploads; returns the stored file names."""
+    names: list[str] = []
+    for offset, url in enumerate(dict.fromkeys(parse_pdf_url(u) for u in urls if u.strip())):
+        data = await fetcher(url)
+        dest.mkdir(parents=True, exist_ok=True)
+        index = start_index + offset + 1
+        unique = f"{index}_{name_from_url(url, index)}"
+        (dest / unique).write_bytes(data)
+        names.append(unique)
+    return names
 
 
 async def save_pdfs(files: list[UploadFile], dest: Path) -> list[str]:

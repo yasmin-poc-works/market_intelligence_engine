@@ -94,3 +94,31 @@ def test_tool_call_failure_gives_up_after_limit():
 
     with pytest.raises(RuntimeError):
         asyncio.run(llm.call_llm(always))
+
+
+def test_retry_hint_parsing():
+    msg = "Error code: 429 - Rate limit reached ... Please try again in 6.825s. Need more tokens?"
+    assert llm.retry_after_seconds(RuntimeError(msg)) == pytest.approx(6.825)
+    assert llm.retry_after_seconds(RuntimeError("try again in 850ms")) == pytest.approx(0.85)
+    assert llm.retry_after_seconds(RuntimeError("try again in 1m2.5s")) == pytest.approx(62.5)
+    assert llm.retry_after_seconds(RuntimeError("try again in 30m0s")) == llm.MAX_HINT_SECONDS
+    assert llm.retry_after_seconds(RuntimeError("boom")) is None
+
+
+def test_backoff_waits_at_least_the_providers_hint(monkeypatch):
+    sleeps = []
+
+    async def record(d):
+        sleeps.append(d)
+
+    monkeypatch.setattr(llm.asyncio, "sleep", record)
+    calls = []
+
+    async def limited():
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("Error code: 429 - Rate limit reached on tokens per minute (TPM). Please try again in 15.4s.")
+        return "ok"
+
+    assert asyncio.run(llm.call_llm(limited, max_retries=3)) == "ok"
+    assert sleeps and sleeps[0] >= 15.4

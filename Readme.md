@@ -51,7 +51,7 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 
 | Method and path | Purpose |
 |---|---|
-| `POST /research/run` | Start a run (multipart form: `brief`, `files` up to 10 PDFs of 20 MB, `include_web`, `include_documents`, `clarification`) |
+| `POST /research/run` | Start a run (multipart form: `brief`, `files` and/or `document_urls` (links to PDFs) up to 10 documents in total of 20 MB each, `include_web`, `include_documents`, `clarification`) |
 | `GET /research/runs/{id}` | Run status, error, clarifying question, `report_id` |
 | `GET /research/status/{id}` | Server-sent events for live progress (supports `Last-Event-ID`) |
 | `GET/POST /watchlist`, `GET/PATCH/DELETE /watchlist/{id}` | Watchlist CRUD (changes sync the scheduler job) |
@@ -62,6 +62,8 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 | `POST /reports/{id}/share`, `GET /share/{token}` | 7-day signed share link and its public read-only view |
 
 **Watchlist monitoring.** On startup the API schedules every active watchlist item (daily or weekly) in-process, so run it with a single worker. Each run researches the topic, then the Diff Agent compares the new report with the previous one for that item (sentence matching with citations stripped; rephrasing with the same figures is ignored; an LLM judge drops leftover rephrasings). The first run is the baseline. A material change (a changed figure, an added or removed finding with figures, or 3+ added/removed findings) creates an in-app alert and, if the item has a `webhook_url`, POSTs a Slack-compatible `{"text": ...}` message (3 attempts with backoff; failures are logged, never fatal). Set `SCHEDULER_ENABLED=false` to turn the scheduler off.
+
+**PDF links.** Instead of downloading a PDF and uploading it, paste its link. The server downloads it when the run starts and stores it with the uploads, so it is handled exactly like an uploaded file. Links must be `http(s)`, point directly at a PDF and be publicly reachable; links to private or local addresses are refused (including through redirects). A bad link rejects the whole request and starts no run.
 
 Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` in `.env` before sharing links. Interactive docs are at `/docs`.
 
@@ -97,7 +99,7 @@ The frontend is Next.js (App Router, TypeScript, Tailwind CSS, `src/` layout). I
 
 | Page | What it does |
 |---|---|
-| `/` | Brief panel: 500-character counter, PDF drag-and-drop (10 files, 20 MB each), web/document toggles, runtime estimate; recent reports |
+| `/` | Brief panel: 500-character counter, PDF drag-and-drop or links to PDFs (10 documents, 20 MB each), web/document toggles, runtime estimate; recent reports |
 | `/runs/[id]` | Live progress over SSE: task rows (Queued/Running/Done/Failed), agent activity log, progress bar, elapsed time; clarifying-question form |
 | `/reports`, `/reports/[id]` | Report viewer: sticky table of contents, clickable citations opening a source drawer, amber `UNVERIFIED` marks, confidence badges, fact-check panel, PDF / `.md` export and 7-day share link |
 | `/share/[token]` | Public read-only view of a shared report |

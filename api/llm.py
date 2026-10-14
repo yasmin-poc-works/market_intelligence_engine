@@ -1,6 +1,7 @@
 """Concurrency limiting and 429 backoff for LLM calls."""
 import asyncio
 import random
+import re
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
@@ -23,6 +24,19 @@ def is_rate_limited(exc: BaseException) -> bool:
         getattr(exc, "response", None), "status_code", None
     )
     return status == 429 or "rate limit" in str(exc).lower()
+
+
+_RETRY_HINT = re.compile(r"try again in (?:(\d+)m)?\s*(\d+(?:\.\d+)?)(ms|s)", re.IGNORECASE)
+MAX_HINT_SECONDS = 90.0
+
+
+def retry_after_seconds(exc: BaseException) -> float | None:
+    """Wait time the provider asked for ("Please try again in 6.825s"), if the error carries one."""
+    m = _RETRY_HINT.search(str(exc))
+    if not m:
+        return None
+    seconds = float(m.group(2)) / (1000 if m.group(3).lower() == "ms" else 1)
+    return min(seconds + 60 * int(m.group(1) or 0), MAX_HINT_SECONDS)
 
 
 def is_tool_call_failure(exc: BaseException) -> bool:
@@ -57,6 +71,9 @@ async def call_llm(
             if not is_rate_limited(exc) or attempt >= retries:
                 raise
             delay = min(max_delay, base_delay * 2**attempt) * (0.5 + random.random() / 2)
+            hint = retry_after_seconds(exc)
+            if hint is not None:  # a token-per-minute limit frees up exactly when the provider says
+                delay = max(delay, hint + 0.5 + random.random())
             attempt += 1
             await asyncio.sleep(delay)
 
