@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     synthesis_model: str | None = None
     writer_model: str | None = None
     fact_check_model: str | None = None
+    entity_model: str | None = None
     llm_max_concurrency: int = Field(3, ge=1)
     llm_max_retries: int = Field(8, ge=0)
 
@@ -41,6 +42,9 @@ class Settings(BaseSettings):
     qdrant_path: str = "data/qdrant"
     qdrant_url: str | None = None
     qdrant_api_key: str | None = None
+
+    # Sources: stored article bodies are trimmed so synthesis stays inside free-tier token limits
+    source_max_chars: int = Field(6000, gt=0)
 
     # Storage
     database_url: str = "sqlite:///data/insightforge.db"
@@ -76,7 +80,7 @@ class Settings(BaseSettings):
         return v
 
     def model_for(self, role: str) -> str:
-        """Model name for a role: planner, researcher, synthesis, writer, fact_check."""
+        """Model name for a role: planner, researcher, synthesis, writer, fact_check, entity."""
         return getattr(self, f"{role}_model", None) or self.llm_model
 
     @property

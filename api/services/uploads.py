@@ -1,8 +1,5 @@
 """PDF upload and PDF-link validation and storage (<= 10 documents in total, <= 20 MB each)."""
-import asyncio
-import ipaddress
 import re
-import socket
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlparse
@@ -11,6 +8,7 @@ import httpx
 from fastapi import UploadFile
 
 from errors import ApiError
+from services.netguard import check_public_host
 
 MAX_FILES = 10
 MAX_BYTES = 20 * 1024 * 1024
@@ -36,16 +34,7 @@ def parse_pdf_url(url: str) -> str:
     return url
 
 
-async def _check_public_host(host: str) -> None:
-    """Refuse links that point at this machine or a private network (server-side request forgery)."""
-    try:
-        infos = await asyncio.get_running_loop().getaddrinfo(host, None, type=socket.SOCK_STREAM)
-    except OSError:
-        raise ApiError(502, f'Could not resolve "{host}"', "fetch_failed") from None
-    for info in infos:
-        ip = ipaddress.ip_address(info[4][0].split("%")[0])
-        if not ip.is_global:
-            raise ApiError(422, f'Links to "{host}" are not allowed (private or local address)', "blocked_address")
+_check_public_host = check_public_host  # module-level name so tests can replace it
 
 
 async def fetch_pdf(url: str) -> bytes:

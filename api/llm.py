@@ -79,7 +79,7 @@ async def call_llm(
 
 
 def make_chat_model(role: str):
-    """Chat model for a role (planner, researcher, synthesis, writer, fact_check)."""
+    """Chat model for a role (planner, researcher, synthesis, writer, fact_check, entity)."""
     from langchain_groq import ChatGroq
 
     s = get_settings()

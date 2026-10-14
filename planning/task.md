@@ -17,7 +17,7 @@
 |---|---|---|---|---|---|
 | 0. Setup and foundations | 17 | 0 | 0 | 11 | 6 |
 | 1. Context engineering layer | 5 | 0 | 0 | 5 | 0 |
-| 2. Researcher agents | 9 | 9 | 0 | 0 | 0 |
+| 2. Researcher agents | 9 | 0 | 0 | 9 | 0 |
 | 3. Planner and orchestration | 6 | 0 | 0 | 6 | 0 |
 | 4. Synthesis, Writer, Fact-Checker | 6 | 0 | 0 | 6 | 0 |
 | 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
@@ -66,15 +66,15 @@
 
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
-| 2.1 | Web Search Agent: SerpAPI integration | TODO | | | |
-| 2.2 | Web Search Agent: full-body fetch and parse (top 5) | TODO | | | |
-| 2.3 | Web Search Agent: credibility scoring (domain, recency decay, byline) | TODO | | | |
-| 2.4 | Web Search Agent: paywall/login-wall detection and logging | TODO | | | |
-| 2.5 | Document Reader Agent: Docling extraction and chunking | TODO | | | |
-| 2.6 | Document Reader Agent: Qdrant `doc_chunks` with metadata, top-k=8 retrieval | TODO | | | |
-| 2.7 | Entity Extractor Agent: entity and relationship extraction | TODO | | | |
-| 2.8 | Entity Extractor Agent: Qdrant `entities` collection | TODO | | | |
-| 2.9 | Entity Extractor Agent: `conflict: true` flagging | TODO | | | |
+| 2.1 | Web Search Agent: SerpAPI integration | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `tools/search.py`: `SearchProvider` interface, `SerpApiProvider` (top 5, organic results), provider chosen by `SEARCH_PROVIDER`; missing key fails with a clear message only when a search is needed. Verified live |
+| 2.2 | Web Search Agent: full-body fetch and parse (top 5) | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `tools/fetch.py` + `agents/web_search.py`: redirects re-checked against private addresses, trafilatura extracts body, title, author and date; top 5 fetched concurrently; bodies stored in the scratch store trimmed to `SOURCE_MAX_CHARS` (6000) so synthesis fits free-tier token limits; returns `SourceRef` only. Verified live: 5/5 real articles parsed |
+| 2.3 | Web Search Agent: credibility scoring (domain, recency decay, byline) | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `tools/credibility.py`: 0.6 x domain tier (gov/edu/major news high, blogs/social low) + 0.25 x recency (halves every 2 years, undated is low) + 0.15 x byline |
+| 2.4 | Web Search Agent: paywall/login-wall detection and logging | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | HTTP 401/402/403/407/429/451 and teaser pages with paywall or login phrases are skipped with a logged reason (`skipped source ...`); the sub-task fails only if no source is usable |
+| 2.5 | Document Reader Agent: Docling extraction and chunking | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `tools/documents.py`: Docling (`HierarchicalChunker`, OCR off) with headings and page numbers, merged into passages of up to about 1200 characters that never span pages; pypdf fallback if Docling fails. Verified with a real PDF (first run downloads Docling models) |
+| 2.6 | Document Reader Agent: Qdrant `doc_chunks` with metadata, top-k=8 retrieval | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `context/vector_store.py` + `agents/doc_reader.py`: Qdrant `doc_chunks` with `{source_filename, page_number, section_heading}`, scoped by run id, top-k=8, indexed once per run; returns chunk ids as `document_chunk` refs, resolved by `make_chunk_lookup` for synthesis and by the fact-checker re-fetch (`document://` URLs) |
+| 2.7 | Entity Extractor Agent: entity and relationship extraction | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | `agents/entity_extractor.py`: LLM extraction in JSON-schema mode (tool-calling mode produced broken JSON on long lists), capped at 12 entities per source; new `ENTITY_MODEL` role. Verified live on `gpt-oss-120b` (12 entities, relationships) and `qwen3.8-27b`; `gpt-oss-20b` fails |
+| 2.8 | Entity Extractor Agent: Qdrant `entities` collection | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | Observations and relationships stored in Qdrant `entities` scoped by run id; the entity graph is rebuilt from them and passed to synthesis |
+| 2.9 | Entity Extractor Agent: `conflict: true` flagging | COMPLETED | 2026-10-15 10:00 | 2026-10-15 13:30 | Same entity (name normalized, company suffixes ignored) with different values for an attribute from different sources sets `conflict: true`; the most credible value is kept and the other stored as `<attribute> (alternate)`; equivalent figures ($50 million = 50M) do not conflict; works across sub-tasks |
 
 ## Phase 3: Planner and orchestration
 

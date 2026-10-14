@@ -20,6 +20,9 @@ dependencies = [
     "pyjwt>=2.15.1",
     "fpdf2>=2.8.9",
     "apscheduler>=3.10,<4.0",
+    "docling>=2.0",
+    "trafilatura>=2.0",
+    "pypdf>=5.0",
 ]
 
 [dependency-groups]
@@ -38,3 +41,4 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }

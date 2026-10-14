@@ -17,6 +17,7 @@ from langgraph.types import Send
 from agents.planner import PlanResult, plan_brief
 from agents.researchers import run_researcher
 from graph.events import EventRecorder
+from graph.run_context import current_run_id
 from schemas import ResearchBrief, RunStatus, SourceRef, SubTask, TaskGraph
 
 
@@ -93,6 +94,7 @@ def build_graph(deps: PipelineDeps):
     async def research(payload: dict[str, Any]) -> dict[str, Any]:
         run_id, task = payload["run_id"], payload["subtask"]
         rec.record(run_id, "subtask_started", task.id, {"title": task.title})
+        current_run_id.set(run_id)
         try:
             refs = await deps.researcher(task)
         except Exception as exc:  # isolate branch failures

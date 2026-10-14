@@ -67,6 +67,22 @@ Settings are loaded by `api/config.py` (pydantic-settings). Relative paths (`QDR
 
 Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` in `.env` before sharing links. Interactive docs are at `/docs`.
 
+### Researchers
+
+Each sub-task goes to one researcher, which sees only that sub-task (never the brief or other sub-tasks) and returns references, not content:
+
+| Researcher | What it does |
+|---|---|
+| Web search | SerpAPI top 5, full article fetch and parse (trafilatura), credibility score (domain tier, recency decay, byline), skips and logs paywalls (HTTP 401/402/403 or teaser text) and login walls; stores bodies in the scratch store (trimmed to `SOURCE_MAX_CHARS`) |
+| Document reader | Docling extraction and structural chunking of the run's PDFs (falls back to pypdf if Docling cannot run), indexed in Qdrant `doc_chunks` with source file, page number and section heading; top-8 retrieval per sub-task; citations use the file name |
+| Entity extractor | Searches like the web researcher, then extracts companies, people, products, funding, figures, dates and regions with relationships into Qdrant `entities`; two sources disagreeing on a fact sets `conflict: true` on the entity. Best effort: if extraction fails, the fetched sources still count as evidence |
+
+Researchers call no LLM except entity extraction, which keeps research cheap on free tiers. Page fetches refuse private and local addresses. The first Docling run downloads its layout models (a few minutes, one time).
+
+**Free-tier models (Groq).** Limits apply per model, so synthesis (the most calls) runs on `qwen/qwen3.8-27b` and the other roles on `openai/gpt-oss-120b`. `openai/gpt-oss-20b` was tested and cannot do structured output here (it answers in plain text), so do not assign it to a role. Roles are set with `PLANNER_MODEL`, `SYNTHESIS_MODEL`, `WRITER_MODEL`, `ENTITY_MODEL`; an empty value uses `LLM_MODEL`. Rate-limit errors are retried using the wait time Groq reports.
+
+Check the real researchers with `uv run python scripts/phase2_smoke_test.py [web|docs|entities|all]` (uses one search and one small LLM call).
+
 ### Backend layout
 
 | Path | Purpose |
@@ -75,7 +91,8 @@ Errors always use `{"error": {"code", "message", "details"?}}`. There is no user
 | `api/llm.py` | LLM concurrency semaphore and 429 backoff (`call_llm`) |
 | `api/schemas/` | Pydantic models for every agent boundary |
 | `api/context/` | Scratch store, token budget (`fit_to_budget`), run log, session memory, summarizer |
-| `api/agents/` | Planner, researcher runner, synthesis, writer, fact-checker |
+| `api/agents/` | Planner, researchers (`web_search`, `doc_reader`, `entity_extractor`), synthesis, writer, fact-checker, diff |
+| `api/tools/` | Researcher building blocks: SerpAPI search, article fetch and parse with paywall detection, credibility scoring, Docling PDF chunking |
 | `api/graph/` | LangGraph pipeline and run/status event recorder |
 | `api/routes/`, `api/services/` | HTTP endpoints (research, watchlist, reports, share) and their helpers (uploads, export, share tokens, run executor) |
 | `api/db/` | SQLAlchemy models and session (SQLite, WAL mode) |
