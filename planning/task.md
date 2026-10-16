@@ -23,7 +23,7 @@
 | 5. FastAPI backend | 7 | 0 | 0 | 7 | 0 |
 | 6. Scheduler and Diff Agent | 4 | 0 | 0 | 4 | 0 |
 | 7. Next.js frontend | 6 | 0 | 0 | 6 | 0 |
-| 8. Evaluation and deliverables | 7 | 6 | 0 | 1 | 0 |
+| 8. Evaluation and deliverables | 7 | 2 | 0 | 5 | 0 |
 | 9. Bonus (optional) | 8 | 7 | 0 | 0 | 1 |
 
 *Update these counts when statuses change.*
@@ -135,10 +135,10 @@
 | ID | Task | Status | Started | Completed | Notes |
 |---|---|---|---|---|---|
 | 8.1 | Write 5 sample briefs with expected report structure in `samples/` | COMPLETED | 2026-10-13 22:20 | 2026-10-13 22:35 | `samples/briefs.json` (machine-readable, for task 8.2) and `samples/README.md` (documentation): 5 briefs of 500 characters or less across SaaS, healthcare, EV batteries, retail regulation and finance, covering five question types, each with expected sub-tasks, section structure, must-cover topics and watch-outs. The PDF brief needs evaluator-supplied annual reports (not in the repo). `api/tests/test_samples.py` checks the files stay valid and in sync |
-| 8.2 | Evaluation script and report (pass rate, citation accuracy, synthesis quality) | TODO | | | |
-| 8.3 | README: local setup (uv, npm, Qdrant), API keys, env vars, architecture diagram | TODO | | | |
-| 8.4 | README: context-engineering writeup with real blowout example from run logs | TODO | | | |
-| 8.5 | README: sample report and end-to-end walkthrough | TODO | | | |
+| 8.2 | Evaluation script and report (pass rate, citation accuracy, synthesis quality) | COMPLETED | 2026-10-15 14:00 | 2026-10-16 12:30 | `evaluation/run_eval.py` + `metrics.py` (unit-tested): fact-check pass rate, citation accuracy (independent of the writer's own grounding check; 'evidence is missing' sentences counted apart, a rule change made after seeing run 1 and disclosed), synthesis score (automated proxies). Only 1 of 5 briefs run live (`payroll-sea`, 4 live runs to get one clean result): fact-check 62% and citation accuracy 59%, both below the 80% targets; synthesis 0.68. Fact-check threshold sensitivity in `evaluation/factcheck_sensitivity.py` (65% of claims pass at 0.85, 83% at 0.75). The threshold was not changed. Other 4 briefs ready to run, not run, to protect the free quota. Live runs exposed and led to fixes for: search query lost the topic (planner now writes `search_query`), SerpAPI timeouts, non-retryable 429, tool-call failures (JSON-schema mode, skip bad source), duplicate citations, wasteful compression, fact-checker blocked by a User-Agent mismatch. Fixes after run 4 not re-measured with a full run |
+| 8.3 | README: local setup (uv, npm, Qdrant), API keys, env vars, architecture diagram | COMPLETED | 2026-10-15 14:00 | 2026-10-16 12:30 | README rewritten: Mermaid architecture diagram, setup with uv, npm and embedded Qdrant (no Docker), API keys table, full environment variable reference with real defaults, first-run notes, known limitations |
+| 8.4 | README: context-engineering writeup with real blowout example from run logs | COMPLETED | 2026-10-15 14:00 | 2026-10-16 12:30 | README 'Context engineering': scratch store design, isolation, token budget choices (compress then drop, never truncate, every cut logged), and a real blowout from run `b9bec041`'s run log: 13 articles became at least 242 claims (6,071 tokens, about 7,765 with prefixes) against a 4,000 budget, 185 cuts (142 dropped, 43 compressed). Also states what the log exposed: compression was wasteful and was changed (not re-measured) |
+| 8.5 | README: sample report and end-to-end walkthrough | COMPLETED | 2026-10-15 14:00 | 2026-10-16 12:30 | README walkthrough from brief to exported PDF (with the real run's stage timings), sample report excerpt, and full sample in `docs/sample_report.md` and `docs/sample_report.pdf` (made by `api/scripts/export_sample.py`; identical repeated citations collapsed, noted in the README). The sample is a real but LOW-confidence report and the README says so. No screenshots or demo video yet (8.6) |
 | 8.6 | Record 5–7 minute demo | TODO | | | |
 | 8.7 | Publish to public repo `insightforge-agent` and post on LinkedIn | TODO | | | |
 

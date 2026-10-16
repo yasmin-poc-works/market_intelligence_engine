@@ -19,6 +19,11 @@ def get_semaphore() -> asyncio.Semaphore:
     return _semaphore
 
 
+def is_request_too_large(exc: BaseException) -> bool:
+    """429 'Request too large': the call itself exceeds a per-minute cap, so waiting cannot help."""
+    return "request too large" in str(exc).lower()
+
+
 def is_rate_limited(exc: BaseException) -> bool:
     status = getattr(exc, "status_code", None) or getattr(
         getattr(exc, "response", None), "status_code", None
@@ -68,7 +73,7 @@ async def call_llm(
             if is_tool_call_failure(exc) and gen_failures < GENERATION_RETRIES:
                 gen_failures += 1  # model glitch, not load: retry immediately
                 continue
-            if not is_rate_limited(exc) or attempt >= retries:
+            if is_request_too_large(exc) or not is_rate_limited(exc) or attempt >= retries:
                 raise
             delay = min(max_delay, base_delay * 2**attempt) * (0.5 + random.random() / 2)
             hint = retry_after_seconds(exc)

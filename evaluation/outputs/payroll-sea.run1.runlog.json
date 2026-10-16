@@ -1,0 +1,1803 @@
+[
+  {
+    "boundary": "synthesis->writer",
+    "tokens_in": 6305,
+    "tokens_out": 1707,
+    "budget": 1711,
+    "cuts": [
+      {
+        "item_id": "E327",
+        "action": "compressed",
+        "reason": "over budget by 4594 tokens",
+        "tokens_before": 31,
+        "tokens_after": 15
+      },
+      {
+        "item_id": "E268",
+        "action": "compressed",
+        "reason": "over budget by 4578 tokens",
+        "tokens_before": 39,
+        "tokens_after": 24
+      },
+      {
+        "item_id": "E265",
+        "action": "compressed",
+        "reason": "over budget by 4563 tokens",
+        "tokens_before": 32,
+        "tokens_after": 17
+      },
+      {
+        "item_id": "E230",
+        "action": "compressed",
+        "reason": "over budget by 4548 tokens",
+        "tokens_before": 33,
+        "tokens_after": 23
+      },
+      {
+        "item_id": "E229",
+        "action": "compressed",
+        "reason": "over budget by 4538 tokens",
+        "tokens_before": 38,
+        "tokens_after": 29
+      },
+      {
+        "item_id": "E198",
+        "action": "compressed",
+        "reason": "over budget by 4529 tokens",
+        "tokens_before": 32,
+        "tokens_after": 22
+      },
+      {
+        "item_id": "E167",
+        "action": "compressed",
+        "reason": "over budget by 4519 tokens",
+        "tokens_before": 46,
+        "tokens_after": 21
+      },
+      {
+        "item_id": "E154",
+        "action": "compressed",
+        "reason": "over budget by 4494 tokens",
+        "tokens_before": 31,
+        "tokens_after": 23
+      },
+      {
+        "item_id": "E146",
+        "action": "compressed",
+        "reason": "over budget by 4486 tokens",
+        "tokens_before": 31,
+        "tokens_after": 21
+      },
+      {
+        "item_id": "E107",
+        "action": "compressed",
+        "reason": "over budget by 4476 tokens",
+        "tokens_before": 38,
+        "tokens_after": 26
+      },
+      {
+        "item_id": "E48",
+        "action": "compressed",
+        "reason": "over budget by 4464 tokens",
+        "tokens_before": 33,
+        "tokens_after": 32
+      },
+      {
+        "item_id": "E27",
+        "action": "compressed",
+        "reason": "over budget by 4463 tokens",
+        "tokens_before": 32,
+        "tokens_after": 27
+      },
+      {
+        "item_id": "E19",
+        "action": "compressed",
+        "reason": "over budget by 4458 tokens",
+        "tokens_before": 34,
+        "tokens_after": 24
+      },
+      {
+        "item_id": "E16",
+        "action": "compressed",
+        "reason": "over budget by 4448 tokens",
+        "tokens_before": 42,
+        "tokens_after": 36
+      },
+      {
+        "item_id": "E7",
+        "action": "compressed",
+        "reason": "over budget by 4442 tokens",
+        "tokens_before": 34,
+        "tokens_after": 28
+      },
+      {
+        "item_id": "E327",
+        "action": "dropped",
+        "reason": "still over budget by 4436 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E326",
+        "action": "dropped",
+        "reason": "still over budget by 4421 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E325",
+        "action": "dropped",
+        "reason": "still over budget by 4404 tokens",
+        "tokens_before": 27,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E324",
+        "action": "dropped",
+        "reason": "still over budget by 4377 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E323",
+        "action": "dropped",
+        "reason": "still over budget by 4362 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E322",
+        "action": "dropped",
+        "reason": "still over budget by 4348 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E321",
+        "action": "dropped",
+        "reason": "still over budget by 4328 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E320",
+        "action": "dropped",
+        "reason": "still over budget by 4311 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E319",
+        "action": "dropped",
+        "reason": "still over budget by 4290 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E318",
+        "action": "dropped",
+        "reason": "still over budget by 4277 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E317",
+        "action": "dropped",
+        "reason": "still over budget by 4260 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E316",
+        "action": "dropped",
+        "reason": "still over budget by 4242 tokens",
+        "tokens_before": 8,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E315",
+        "action": "dropped",
+        "reason": "still over budget by 4234 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E314",
+        "action": "dropped",
+        "reason": "still over budget by 4214 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E313",
+        "action": "dropped",
+        "reason": "still over budget by 4197 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E312",
+        "action": "dropped",
+        "reason": "still over budget by 4184 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E311",
+        "action": "dropped",
+        "reason": "still over budget by 4171 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E310",
+        "action": "dropped",
+        "reason": "still over budget by 4152 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E309",
+        "action": "dropped",
+        "reason": "still over budget by 4135 tokens",
+        "tokens_before": 30,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E308",
+        "action": "dropped",
+        "reason": "still over budget by 4105 tokens",
+        "tokens_before": 29,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E307",
+        "action": "dropped",
+        "reason": "still over budget by 4076 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E306",
+        "action": "dropped",
+        "reason": "still over budget by 4056 tokens",
+        "tokens_before": 26,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E305",
+        "action": "dropped",
+        "reason": "still over budget by 4030 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E304",
+        "action": "dropped",
+        "reason": "still over budget by 4008 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E303",
+        "action": "dropped",
+        "reason": "still over budget by 3987 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E302",
+        "action": "dropped",
+        "reason": "still over budget by 3968 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E301",
+        "action": "dropped",
+        "reason": "still over budget by 3957 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E300",
+        "action": "dropped",
+        "reason": "still over budget by 3942 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E299",
+        "action": "dropped",
+        "reason": "still over budget by 3927 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E298",
+        "action": "dropped",
+        "reason": "still over budget by 3914 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E297",
+        "action": "dropped",
+        "reason": "still over budget by 3900 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E296",
+        "action": "dropped",
+        "reason": "still over budget by 3884 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E295",
+        "action": "dropped",
+        "reason": "still over budget by 3856 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E294",
+        "action": "dropped",
+        "reason": "still over budget by 3834 tokens",
+        "tokens_before": 29,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E293",
+        "action": "dropped",
+        "reason": "still over budget by 3805 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E292",
+        "action": "dropped",
+        "reason": "still over budget by 3781 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E291",
+        "action": "dropped",
+        "reason": "still over budget by 3765 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E290",
+        "action": "dropped",
+        "reason": "still over budget by 3753 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E289",
+        "action": "dropped",
+        "reason": "still over budget by 3736 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E288",
+        "action": "dropped",
+        "reason": "still over budget by 3712 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E287",
+        "action": "dropped",
+        "reason": "still over budget by 3694 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E286",
+        "action": "dropped",
+        "reason": "still over budget by 3671 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E285",
+        "action": "dropped",
+        "reason": "still over budget by 3646 tokens",
+        "tokens_before": 9,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E284",
+        "action": "dropped",
+        "reason": "still over budget by 3637 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E283",
+        "action": "dropped",
+        "reason": "still over budget by 3619 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E282",
+        "action": "dropped",
+        "reason": "still over budget by 3606 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E281",
+        "action": "dropped",
+        "reason": "still over budget by 3593 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E280",
+        "action": "dropped",
+        "reason": "still over budget by 3565 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E279",
+        "action": "dropped",
+        "reason": "still over budget by 3551 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E278",
+        "action": "dropped",
+        "reason": "still over budget by 3526 tokens",
+        "tokens_before": 9,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E277",
+        "action": "dropped",
+        "reason": "still over budget by 3517 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E276",
+        "action": "dropped",
+        "reason": "still over budget by 3497 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E275",
+        "action": "dropped",
+        "reason": "still over budget by 3485 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E274",
+        "action": "dropped",
+        "reason": "still over budget by 3460 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E273",
+        "action": "dropped",
+        "reason": "still over budget by 3446 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E272",
+        "action": "dropped",
+        "reason": "still over budget by 3428 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E271",
+        "action": "dropped",
+        "reason": "still over budget by 3400 tokens",
+        "tokens_before": 26,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E270",
+        "action": "dropped",
+        "reason": "still over budget by 3374 tokens",
+        "tokens_before": 27,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E269",
+        "action": "dropped",
+        "reason": "still over budget by 3347 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E268",
+        "action": "dropped",
+        "reason": "still over budget by 3333 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E267",
+        "action": "dropped",
+        "reason": "still over budget by 3309 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E266",
+        "action": "dropped",
+        "reason": "still over budget by 3285 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E265",
+        "action": "dropped",
+        "reason": "still over budget by 3264 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E264",
+        "action": "dropped",
+        "reason": "still over budget by 3247 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E263",
+        "action": "dropped",
+        "reason": "still over budget by 3225 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E262",
+        "action": "dropped",
+        "reason": "still over budget by 3208 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E261",
+        "action": "dropped",
+        "reason": "still over budget by 3197 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E260",
+        "action": "dropped",
+        "reason": "still over budget by 3182 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E259",
+        "action": "dropped",
+        "reason": "still over budget by 3170 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E258",
+        "action": "dropped",
+        "reason": "still over budget by 3150 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E257",
+        "action": "dropped",
+        "reason": "still over budget by 3130 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E256",
+        "action": "dropped",
+        "reason": "still over budget by 3110 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E255",
+        "action": "dropped",
+        "reason": "still over budget by 3099 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E254",
+        "action": "dropped",
+        "reason": "still over budget by 3079 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E253",
+        "action": "dropped",
+        "reason": "still over budget by 3058 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E252",
+        "action": "dropped",
+        "reason": "still over budget by 3043 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E251",
+        "action": "dropped",
+        "reason": "still over budget by 3024 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E250",
+        "action": "dropped",
+        "reason": "still over budget by 3008 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E249",
+        "action": "dropped",
+        "reason": "still over budget by 2983 tokens",
+        "tokens_before": 8,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E248",
+        "action": "dropped",
+        "reason": "still over budget by 2975 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E247",
+        "action": "dropped",
+        "reason": "still over budget by 2957 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E246",
+        "action": "dropped",
+        "reason": "still over budget by 2946 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E245",
+        "action": "dropped",
+        "reason": "still over budget by 2933 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E244",
+        "action": "dropped",
+        "reason": "still over budget by 2916 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E243",
+        "action": "dropped",
+        "reason": "still over budget by 2896 tokens",
+        "tokens_before": 27,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E242",
+        "action": "dropped",
+        "reason": "still over budget by 2869 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E241",
+        "action": "dropped",
+        "reason": "still over budget by 2844 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E240",
+        "action": "dropped",
+        "reason": "still over budget by 2834 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E239",
+        "action": "dropped",
+        "reason": "still over budget by 2824 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E238",
+        "action": "dropped",
+        "reason": "still over budget by 2812 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E237",
+        "action": "dropped",
+        "reason": "still over budget by 2796 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E236",
+        "action": "dropped",
+        "reason": "still over budget by 2780 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E235",
+        "action": "dropped",
+        "reason": "still over budget by 2761 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E234",
+        "action": "dropped",
+        "reason": "still over budget by 2739 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E233",
+        "action": "dropped",
+        "reason": "still over budget by 2716 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E232",
+        "action": "dropped",
+        "reason": "still over budget by 2694 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E231",
+        "action": "dropped",
+        "reason": "still over budget by 2669 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E230",
+        "action": "dropped",
+        "reason": "still over budget by 2647 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E229",
+        "action": "dropped",
+        "reason": "still over budget by 2624 tokens",
+        "tokens_before": 29,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E228",
+        "action": "dropped",
+        "reason": "still over budget by 2595 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E227",
+        "action": "dropped",
+        "reason": "still over budget by 2581 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E226",
+        "action": "dropped",
+        "reason": "still over budget by 2566 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E225",
+        "action": "dropped",
+        "reason": "still over budget by 2555 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E224",
+        "action": "dropped",
+        "reason": "still over budget by 2537 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E223",
+        "action": "dropped",
+        "reason": "still over budget by 2520 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E222",
+        "action": "dropped",
+        "reason": "still over budget by 2502 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E221",
+        "action": "dropped",
+        "reason": "still over budget by 2485 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E220",
+        "action": "dropped",
+        "reason": "still over budget by 2467 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E219",
+        "action": "dropped",
+        "reason": "still over budget by 2450 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E218",
+        "action": "dropped",
+        "reason": "still over budget by 2432 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E217",
+        "action": "dropped",
+        "reason": "still over budget by 2415 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E216",
+        "action": "dropped",
+        "reason": "still over budget by 2397 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E215",
+        "action": "dropped",
+        "reason": "still over budget by 2384 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E214",
+        "action": "dropped",
+        "reason": "still over budget by 2366 tokens",
+        "tokens_before": 7,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E213",
+        "action": "dropped",
+        "reason": "still over budget by 2359 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E212",
+        "action": "dropped",
+        "reason": "still over budget by 2347 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E211",
+        "action": "dropped",
+        "reason": "still over budget by 2328 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E210",
+        "action": "dropped",
+        "reason": "still over budget by 2311 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E209",
+        "action": "dropped",
+        "reason": "still over budget by 2294 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E208",
+        "action": "dropped",
+        "reason": "still over budget by 2283 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E207",
+        "action": "dropped",
+        "reason": "still over budget by 2265 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E206",
+        "action": "dropped",
+        "reason": "still over budget by 2250 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E205",
+        "action": "dropped",
+        "reason": "still over budget by 2239 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E204",
+        "action": "dropped",
+        "reason": "still over budget by 2220 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E203",
+        "action": "dropped",
+        "reason": "still over budget by 2210 tokens",
+        "tokens_before": 9,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E202",
+        "action": "dropped",
+        "reason": "still over budget by 2201 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E201",
+        "action": "dropped",
+        "reason": "still over budget by 2189 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E200",
+        "action": "dropped",
+        "reason": "still over budget by 2172 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E199",
+        "action": "dropped",
+        "reason": "still over budget by 2155 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E198",
+        "action": "dropped",
+        "reason": "still over budget by 2145 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E197",
+        "action": "dropped",
+        "reason": "still over budget by 2123 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E196",
+        "action": "dropped",
+        "reason": "still over budget by 2098 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E195",
+        "action": "dropped",
+        "reason": "still over budget by 2078 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E194",
+        "action": "dropped",
+        "reason": "still over budget by 2055 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E193",
+        "action": "dropped",
+        "reason": "still over budget by 2034 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E192",
+        "action": "dropped",
+        "reason": "still over budget by 2021 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E191",
+        "action": "dropped",
+        "reason": "still over budget by 2001 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E190",
+        "action": "dropped",
+        "reason": "still over budget by 1984 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E189",
+        "action": "dropped",
+        "reason": "still over budget by 1961 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E188",
+        "action": "dropped",
+        "reason": "still over budget by 1938 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E187",
+        "action": "dropped",
+        "reason": "still over budget by 1915 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E186",
+        "action": "dropped",
+        "reason": "still over budget by 1897 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E185",
+        "action": "dropped",
+        "reason": "still over budget by 1878 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E184",
+        "action": "dropped",
+        "reason": "still over budget by 1864 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E183",
+        "action": "dropped",
+        "reason": "still over budget by 1850 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E182",
+        "action": "dropped",
+        "reason": "still over budget by 1834 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E181",
+        "action": "dropped",
+        "reason": "still over budget by 1815 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E180",
+        "action": "dropped",
+        "reason": "still over budget by 1794 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E179",
+        "action": "dropped",
+        "reason": "still over budget by 1778 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E178",
+        "action": "dropped",
+        "reason": "still over budget by 1758 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E177",
+        "action": "dropped",
+        "reason": "still over budget by 1736 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E176",
+        "action": "dropped",
+        "reason": "still over budget by 1713 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E175",
+        "action": "dropped",
+        "reason": "still over budget by 1694 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E174",
+        "action": "dropped",
+        "reason": "still over budget by 1682 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E173",
+        "action": "dropped",
+        "reason": "still over budget by 1664 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E172",
+        "action": "dropped",
+        "reason": "still over budget by 1654 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E171",
+        "action": "dropped",
+        "reason": "still over budget by 1643 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E170",
+        "action": "dropped",
+        "reason": "still over budget by 1631 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E169",
+        "action": "dropped",
+        "reason": "still over budget by 1614 tokens",
+        "tokens_before": 30,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E168",
+        "action": "dropped",
+        "reason": "still over budget by 1584 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E167",
+        "action": "dropped",
+        "reason": "still over budget by 1562 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E166",
+        "action": "dropped",
+        "reason": "still over budget by 1541 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E165",
+        "action": "dropped",
+        "reason": "still over budget by 1529 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E164",
+        "action": "dropped",
+        "reason": "still over budget by 1508 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E163",
+        "action": "dropped",
+        "reason": "still over budget by 1492 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E162",
+        "action": "dropped",
+        "reason": "still over budget by 1477 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E161",
+        "action": "dropped",
+        "reason": "still over budget by 1449 tokens",
+        "tokens_before": 30,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E160",
+        "action": "dropped",
+        "reason": "still over budget by 1419 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E159",
+        "action": "dropped",
+        "reason": "still over budget by 1403 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E158",
+        "action": "dropped",
+        "reason": "still over budget by 1390 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E157",
+        "action": "dropped",
+        "reason": "still over budget by 1374 tokens",
+        "tokens_before": 19,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E156",
+        "action": "dropped",
+        "reason": "still over budget by 1355 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E155",
+        "action": "dropped",
+        "reason": "still over budget by 1332 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E154",
+        "action": "dropped",
+        "reason": "still over budget by 1304 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E153",
+        "action": "dropped",
+        "reason": "still over budget by 1281 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E152",
+        "action": "dropped",
+        "reason": "still over budget by 1260 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E151",
+        "action": "dropped",
+        "reason": "still over budget by 1238 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E150",
+        "action": "dropped",
+        "reason": "still over budget by 1217 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E149",
+        "action": "dropped",
+        "reason": "still over budget by 1194 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E148",
+        "action": "dropped",
+        "reason": "still over budget by 1174 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E147",
+        "action": "dropped",
+        "reason": "still over budget by 1157 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E146",
+        "action": "dropped",
+        "reason": "still over budget by 1141 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E145",
+        "action": "dropped",
+        "reason": "still over budget by 1120 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E144",
+        "action": "dropped",
+        "reason": "still over budget by 1096 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E143",
+        "action": "dropped",
+        "reason": "still over budget by 1068 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E142",
+        "action": "dropped",
+        "reason": "still over budget by 1052 tokens",
+        "tokens_before": 27,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E141",
+        "action": "dropped",
+        "reason": "still over budget by 1025 tokens",
+        "tokens_before": 30,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E140",
+        "action": "dropped",
+        "reason": "still over budget by 995 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E139",
+        "action": "dropped",
+        "reason": "still over budget by 977 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E138",
+        "action": "dropped",
+        "reason": "still over budget by 953 tokens",
+        "tokens_before": 27,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E137",
+        "action": "dropped",
+        "reason": "still over budget by 926 tokens",
+        "tokens_before": 26,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E136",
+        "action": "dropped",
+        "reason": "still over budget by 900 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E135",
+        "action": "dropped",
+        "reason": "still over budget by 883 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E134",
+        "action": "dropped",
+        "reason": "still over budget by 865 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E133",
+        "action": "dropped",
+        "reason": "still over budget by 847 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E132",
+        "action": "dropped",
+        "reason": "still over budget by 832 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E131",
+        "action": "dropped",
+        "reason": "still over budget by 819 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E130",
+        "action": "dropped",
+        "reason": "still over budget by 791 tokens",
+        "tokens_before": 30,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E129",
+        "action": "dropped",
+        "reason": "still over budget by 761 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E128",
+        "action": "dropped",
+        "reason": "still over budget by 746 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E127",
+        "action": "dropped",
+        "reason": "still over budget by 731 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E126",
+        "action": "dropped",
+        "reason": "still over budget by 714 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E125",
+        "action": "dropped",
+        "reason": "still over budget by 700 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E124",
+        "action": "dropped",
+        "reason": "still over budget by 684 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E123",
+        "action": "dropped",
+        "reason": "still over budget by 664 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E122",
+        "action": "dropped",
+        "reason": "still over budget by 646 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E121",
+        "action": "dropped",
+        "reason": "still over budget by 632 tokens",
+        "tokens_before": 25,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E120",
+        "action": "dropped",
+        "reason": "still over budget by 607 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E119",
+        "action": "dropped",
+        "reason": "still over budget by 593 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E118",
+        "action": "dropped",
+        "reason": "still over budget by 570 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E117",
+        "action": "dropped",
+        "reason": "still over budget by 548 tokens",
+        "tokens_before": 28,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E116",
+        "action": "dropped",
+        "reason": "still over budget by 520 tokens",
+        "tokens_before": 26,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E115",
+        "action": "dropped",
+        "reason": "still over budget by 494 tokens",
+        "tokens_before": 21,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E114",
+        "action": "dropped",
+        "reason": "still over budget by 473 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E113",
+        "action": "dropped",
+        "reason": "still over budget by 449 tokens",
+        "tokens_before": 15,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E112",
+        "action": "dropped",
+        "reason": "still over budget by 434 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E111",
+        "action": "dropped",
+        "reason": "still over budget by 421 tokens",
+        "tokens_before": 10,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E110",
+        "action": "dropped",
+        "reason": "still over budget by 411 tokens",
+        "tokens_before": 9,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E109",
+        "action": "dropped",
+        "reason": "still over budget by 402 tokens",
+        "tokens_before": 22,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E108",
+        "action": "dropped",
+        "reason": "still over budget by 380 tokens",
+        "tokens_before": 16,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E107",
+        "action": "dropped",
+        "reason": "still over budget by 364 tokens",
+        "tokens_before": 26,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E106",
+        "action": "dropped",
+        "reason": "still over budget by 338 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E105",
+        "action": "dropped",
+        "reason": "still over budget by 315 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E104",
+        "action": "dropped",
+        "reason": "still over budget by 303 tokens",
+        "tokens_before": 24,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E103",
+        "action": "dropped",
+        "reason": "still over budget by 279 tokens",
+        "tokens_before": 20,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E102",
+        "action": "dropped",
+        "reason": "still over budget by 259 tokens",
+        "tokens_before": 29,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E101",
+        "action": "dropped",
+        "reason": "still over budget by 230 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E100",
+        "action": "dropped",
+        "reason": "still over budget by 207 tokens",
+        "tokens_before": 23,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E99",
+        "action": "dropped",
+        "reason": "still over budget by 184 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E98",
+        "action": "dropped",
+        "reason": "still over budget by 172 tokens",
+        "tokens_before": 29,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E97",
+        "action": "dropped",
+        "reason": "still over budget by 143 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E96",
+        "action": "dropped",
+        "reason": "still over budget by 130 tokens",
+        "tokens_before": 9,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E95",
+        "action": "dropped",
+        "reason": "still over budget by 121 tokens",
+        "tokens_before": 18,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E94",
+        "action": "dropped",
+        "reason": "still over budget by 103 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E93",
+        "action": "dropped",
+        "reason": "still over budget by 89 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E92",
+        "action": "dropped",
+        "reason": "still over budget by 77 tokens",
+        "tokens_before": 12,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E91",
+        "action": "dropped",
+        "reason": "still over budget by 65 tokens",
+        "tokens_before": 11,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E90",
+        "action": "dropped",
+        "reason": "still over budget by 54 tokens",
+        "tokens_before": 17,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E89",
+        "action": "dropped",
+        "reason": "still over budget by 37 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E88",
+        "action": "dropped",
+        "reason": "still over budget by 23 tokens",
+        "tokens_before": 13,
+        "tokens_after": 0
+      },
+      {
+        "item_id": "E87",
+        "action": "dropped",
+        "reason": "still over budget by 10 tokens",
+        "tokens_before": 14,
+        "tokens_after": 0
+      }
+    ],
+    "at": "2026-10-16T05:04:34.376955+00:00"
+  }
+]

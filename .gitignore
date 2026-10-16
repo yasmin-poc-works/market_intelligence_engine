@@ -104,3 +104,6 @@ data/
 # ---------- Logs ----------
 *.log
 logs/
+
+# Evaluation scratch logs
+evaluation/run_*.log

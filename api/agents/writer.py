@@ -156,8 +156,16 @@ def build_prompt(brief: str, evidence: EvidenceBundle, headings: list[str], viol
     return prompt
 
 
+def make_title(brief: str, limit: int = 100) -> str:
+    """Report title from the brief: its first sentence, cut at a word boundary if too long."""
+    first = re.split(r"(?<=[.!?])\s+", brief.strip().split(NL)[0])[0].rstrip(" .")
+    if len(first) <= limit:
+        return first or "Research report"
+    return first[:limit].rsplit(" ", 1)[0].rstrip(" ,;:") + "..."
+
+
 def make_llm_generator() -> Generate:
-    model = make_chat_model("writer").with_structured_output(WriterOutput)
+    model = make_chat_model("writer").with_structured_output(WriterOutput, method="json_schema")
 
     async def generate(prompt: str) -> WriterOutput:
         out = await call_llm(lambda: model.ainvoke(prompt))
@@ -203,7 +211,7 @@ async def write_report(
     if out.gaps_and_limitations.strip():
         gaps.insert(0, out.gaps_and_limitations.strip())
     return ReportDraft(
-        title=task_graph.brief.split(NL)[0][:120], executive_summary=summary, sections=sections, gaps=gaps
+        title=make_title(task_graph.brief), executive_summary=summary, sections=sections, gaps=gaps
     )
 
 
@@ -223,7 +231,9 @@ def render_text(text: str, evidence: dict[str, EvidenceItem], sources: dict[str,
         for sentence in split_sentences(line):
             ids = _MARKER.findall(sentence)
             cites = " ".join(
-                _citation(sid, sources) for i in dict.fromkeys(ids) if i in evidence for sid in evidence[i].source_ids
+                dict.fromkeys(  # several claims from one source must not repeat its citation
+                    _citation(sid, sources) for i in dict.fromkeys(ids) if i in evidence for sid in evidence[i].source_ids
+                )
             )
             body = _MARKER.sub("", sentence).replace(" .", ".").replace("  ", " ").strip()
             body = re.sub(r"\s+([.!?])$", r"\1", body)

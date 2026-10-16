@@ -1,0 +1,51 @@
+[
+  {
+    "id": "payroll-sea",
+    "title": "B2B payroll software in Southeast Asia",
+    "run_id": "b9bec0414bf547a6a417fd2e44d94de5",
+    "status": "COMPLETE",
+    "error": null,
+    "seconds": 948,
+    "report_id": "756f35e0c74f40709204e3c302e422b8",
+    "fact_check": {
+      "pass_rate": 0.625,
+      "checked": 8,
+      "failed": 3,
+      "meets_target": false
+    },
+    "citations": {
+      "claim_sentences": 18,
+      "cited_sentences": 17,
+      "gap_statements": 1,
+      "citation_coverage": 1.0,
+      "citations": 55,
+      "resolvable_citations": 55,
+      "citation_accuracy": 0.588,
+      "unsupported_examples": [
+        "The Southeast Asian B2B payroll software market remains highly fragmented due to diverse national regulations and frequent legislative changes.       ",
+        "The broader category of global payroll software provides centralized processing for multinational employers and is referenced as a key solution type in the evid",
+        "The evidence shows a severe contraction in Southeast Asian venture capital activity, with only 14 VC funds closing in 2024 versus 32 the prior year and a 33.9% "
+      ],
+      "meets_target": false
+    },
+    "quality": {
+      "score": 0.683,
+      "structure": 1.0,
+      "executive_summary_words": 77,
+      "section_count": 3,
+      "coverage": 0.667,
+      "missing_topics": [
+        "Indonesia",
+        "competitor names"
+      ],
+      "non_low_confidence_sections": "0/3",
+      "source_domains": 4
+    },
+    "context": {
+      "boundaries": 1,
+      "boundaries_over_budget": 1,
+      "cuts": 185,
+      "tokens_saved": 3788
+    }
+  }
+]

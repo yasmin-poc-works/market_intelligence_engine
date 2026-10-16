@@ -133,3 +133,20 @@ def test_deepagents_enables_summarization_by_default():
     from deepagents.middleware.summarization import create_summarization_middleware
 
     assert callable(create_summarization_middleware)
+
+
+def test_short_items_are_dropped_by_rank_without_calling_the_summarizer():
+    from context.token_budget import BudgetItem, count_tokens, fit_to_budget
+
+    calls = []
+
+    def summarizer(text, target):
+        calls.append(text)
+        return text[:10]
+
+    claim = " ".join(f"word{i}" for i in range(20))  # a short atomic claim
+    items = [BudgetItem(f"E{i}", claim, priority=float(10 - i)) for i in range(10)]
+    budget = count_tokens(claim) * 6
+    kept = fit_to_budget(items, budget, summarizer, min_compress_tokens=60)
+    assert calls == []  # nothing worth summarizing
+    assert [i.id for i in kept] == [f"E{i}" for i in range(6)]  # the highest-ranked survive

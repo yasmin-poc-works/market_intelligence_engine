@@ -296,3 +296,14 @@ def test_stage_exception_fails_run_and_skips_later_stages(env):
     deps = PipelineDeps(recorder=rec, planner=good_planner(3), researcher=researcher, write=write, fact_check=fact_check)
     final = run(run_pipeline(run_id, make_brief(BRIEF), deps))
     assert final["status"] == RunStatus.FAILED and not called
+
+
+def test_planner_search_query_reaches_the_subtask_and_prompt_demands_self_contained_scopes():
+    from agents.planner import PLANNER_PROMPT
+
+    subs = planned(3)
+    subs[0].search_query = "  B2B payroll software Southeast Asia pricing 2025  "
+    res = asyncio.run(plan_brief(make_brief(BRIEF), agent=FakeAgent(PlannerOutput(subtasks=subs))))
+    assert res.task_graph.subtasks[0].search_query == "B2B payroll software Southeast Asia pricing 2025"
+    assert res.task_graph.subtasks[1].search_query is None  # planner gave none: researchers fall back to title + scope
+    assert "self-contained" in PLANNER_PROMPT and "search_query" in PLANNER_PROMPT

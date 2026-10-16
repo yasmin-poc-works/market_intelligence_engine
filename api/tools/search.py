@@ -1,4 +1,5 @@
 """Web search behind a small interface (SEARCH_PROVIDER), so Tavily or Brave can be added later."""
+import asyncio
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -8,6 +9,9 @@ from config import get_settings
 
 SERPAPI_URL = "https://serpapi.com/search.json"
 DEFAULT_RESULTS = 5
+ATTEMPTS = 3  # SerpAPI occasionally times out or returns 5xx
+RETRY_DELAY = 1.5
+TIMEOUT = 30
 
 
 @dataclass
@@ -35,16 +39,24 @@ class SerpApiProvider:
 
     async def search(self, query: str, num: int = DEFAULT_RESULTS) -> list[SearchResult]:
         params = {"engine": "google", "q": query, "num": num, "api_key": self._key}
-        client = self._client or httpx.AsyncClient(timeout=20)
+        client = self._client or httpx.AsyncClient(timeout=TIMEOUT)
         try:
-            resp = await client.get(SERPAPI_URL, params=params)
-        except httpx.HTTPError as exc:
-            raise SearchError(f"search request failed: {type(exc).__name__}") from None
+            for attempt in range(ATTEMPTS):
+                last = attempt == ATTEMPTS - 1
+                try:
+                    resp = await client.get(SERPAPI_URL, params=params)
+                except httpx.HTTPError as exc:
+                    if last:
+                        raise SearchError(f"search request failed: {type(exc).__name__}") from None
+                else:
+                    if resp.status_code == 200:
+                        break
+                    if last or resp.status_code < 500 and resp.status_code != 429:
+                        raise SearchError(f"search failed with HTTP {resp.status_code}")
+                await asyncio.sleep(RETRY_DELAY * 2**attempt)
         finally:
             if self._client is None:
                 await client.aclose()
-        if resp.status_code != 200:
-            raise SearchError(f"search failed with HTTP {resp.status_code}")
         data = resp.json()
         if data.get("error") and not data.get("organic_results"):
             raise SearchError(f"search failed: {data['error']}")

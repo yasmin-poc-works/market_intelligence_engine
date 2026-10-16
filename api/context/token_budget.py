@@ -53,11 +53,12 @@ def fit_to_budget(
     *,
     boundary: str = "fit_to_budget",
     run_log: RunLog | None = None,
+    min_compress_tokens: int = MIN_SUMMARY_TOKENS,
 ) -> list[BudgetItem]:
     """Return items whose total tokens fit `budget`, original order preserved.
 
     1. Compress items lowest priority first, each down to just what is needed
-       (never below MIN_SUMMARY_TOKENS).
+       (never below MIN_SUMMARY_TOKENS; items of min_compress_tokens or fewer are not worth a call).
     2. If still over, drop the lowest-priority items whole (logged as dropped).
     Every change is recorded in the run log with the reason.
     """
@@ -74,7 +75,7 @@ def fit_to_budget(
             if excess <= 0:
                 break
             before = current[item.id].tokens
-            if before <= MIN_SUMMARY_TOKENS:
+            if before <= max(MIN_SUMMARY_TOKENS, min_compress_tokens):  # too short to be worth a summarizer call
                 continue
             target = max(MIN_SUMMARY_TOKENS, before - excess)
             summary = summarizer(current[item.id].text, target)

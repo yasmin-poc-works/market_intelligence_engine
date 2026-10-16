@@ -5,6 +5,7 @@ refs -> raw sources (scratch store / Qdrant chunks) -> atomic claims -> dedupe a
 for citations). Raw bodies never leave this module.
 """
 import asyncio
+import logging
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -26,6 +27,12 @@ from context.token_budget import (
 from llm import call_llm, make_chat_model
 from schemas import Confidence, EntityGraph, EvidenceBundle, EvidenceItem, SourceRef
 
+log = logging.getLogger("insightforge")
+
+# Claims are atomic sentences of about 30 to 40 tokens. Summarizing one saves a few tokens but costs a model call
+# (in a real run: 43 calls saved 575 tokens while dropping the lowest-ranked claims saved 3,213), so only longer
+# items are compressed and the rest are dropped by rank.
+COMPRESS_MIN_TOKENS = 60
 HIGH_CREDIBILITY = 0.7  # single source at or above this is MEDIUM, below is LOW
 DEDUPE_JACCARD = 0.6
 EXTRACT_CHUNK_TOKENS = 3000
@@ -128,6 +135,7 @@ async def synthesize(
     sources: dict[str, dict[str, Any]] = {}
     candidates: list[tuple[str, str]] = []  # (claim, source_id)
     unresolved: list[str] = []
+    failed_sources: list[str] = []
     for ref in {r.source_id: r for r in refs}.values():  # dedupe refs by id
         rec = resolve_ref(ref, store, chunk_lookup)
         if rec is None:
@@ -141,7 +149,13 @@ async def synthesize(
             "credibility_score": float(rec.get("credibility_score", 0.0)),
         }
         for piece in split_by_tokens(rec.get("body_text", ""), EXTRACT_CHUNK_TOKENS):
-            for claim in await extractor({"title": rec.get("title", ""), "text": piece}):
+            try:
+                claims = await extractor({"title": rec.get("title", ""), "text": piece})
+            except Exception as exc:  # one source the model cannot parse must not sink the whole run
+                log.warning("claim extraction failed for %s: %s: %s", rec.get("url", ref.source_id), type(exc).__name__, str(exc)[:160])
+                failed_sources.append(ref.source_id)
+                continue
+            for claim in claims:
                 if claim.strip():
                     candidates.append((claim.strip(), ref.source_id))
 
@@ -214,7 +228,8 @@ def _fit_evidence(items: list[EvidenceItem], budget: int, summarizer: Summarizer
     n = len(items)
     budget_items = [BudgetItem(it.id, it.claim, priority=float(n - idx)) for idx, it in enumerate(items)]
     fitted = fit_to_budget(
-        budget_items, max(0, budget - overhead), summarizer, boundary="synthesis->writer", run_log=run_log
+        budget_items, max(0, budget - overhead), summarizer, boundary="synthesis->writer", run_log=run_log,
+        min_compress_tokens=COMPRESS_MIN_TOKENS,
     )
     by_id = {b.id: b.text for b in fitted}
     out = [it.model_copy(update={"claim": by_id[it.id]}) for it in items if it.id in by_id]
@@ -223,7 +238,7 @@ def _fit_evidence(items: list[EvidenceItem], budget: int, summarizer: Summarizer
 
 
 def make_llm_extractor() -> Extractor:
-    model = make_chat_model("synthesis").with_structured_output(ClaimList)
+    model = make_chat_model("synthesis").with_structured_output(ClaimList, method="json_schema")
 
     async def extract(chunk: dict) -> list[str]:
         prompt = (

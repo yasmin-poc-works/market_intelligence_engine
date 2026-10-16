@@ -137,7 +137,8 @@ def render_markdown(results: list[dict], skipped: list[str]) -> str:
                 "",
                 f"- Fact-check: {fc['failed']} of {fc['checked']} sampled claims failed verification.",
                 f"- Citations: {ct['citations']} in total, {ct['resolvable_citations']} resolve to a stored source; "
-                f"{pct(ct['citation_coverage'])} of claim sentences carry a citation.",
+                f"{pct(ct['citation_coverage'])} of claim sentences carry a citation; "
+                f"{ct['gap_statements']} cited sentence(s) only state that evidence is missing and are not scored.",
                 f"- Structure: {q['section_count']} sections, executive summary {q['executive_summary_words']} words "
                 f"(limit 150), {q['non_low_confidence_sections']} sections above LOW confidence, "
                 f"{q['source_domains']} distinct source domains.",
@@ -154,9 +155,10 @@ def render_markdown(results: list[dict], skipped: list[str]) -> str:
         "",
         "- **Fact-check pass rate**: the Fact-Checker's own result. It samples 20% of the cited claims (at least 5), "
         "re-fetches each source and passes a claim when some passage reaches cosine similarity 0.85.",
-        "- **Citation accuracy**: of the claim sentences that carry a `[Source: ...]` citation, the share whose cited "
+        "- **Citation accuracy**: of the factual sentences that carry a `[Source: ...]` citation, the share whose cited "
         "sources' stored evidence contains the sentence's figures and at least 60% of its words. An independent "
-        "check of the writer's own grounding check.",
+        "check of the writer's own grounding check. Sentences that only say the evidence is missing (\"the evidence "
+        "lacks pricing data\") carry a citation but make no factual claim, so they are counted separately.",
         "- **Synthesis score** (0 to 1): 0.30 structure (summary present and at most 150 words, 3 to 6 sections, gaps "
         "section) + 0.35 coverage of the brief's must-cover topics + 0.20 share of sections above LOW confidence + "
         "0.15 source diversity (4 or more distinct domains is full marks). These are proxies; a human reads the "

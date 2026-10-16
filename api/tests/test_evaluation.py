@@ -99,7 +99,7 @@ def test_markdown_report_renders_results_and_skips():
         "id": "x", "title": "T", "run_id": "r1", "status": "COMPLETE", "error": None, "seconds": 42,
         "fact_check": {"pass_rate": 0.9, "checked": 5, "failed": 0, "meets_target": True},
         "citations": {"citation_accuracy": 0.75, "meets_target": False, "cited_sentences": 6, "claim_sentences": 8,
-                      "citations": 7, "resolvable_citations": 7, "citation_coverage": 0.75, "unsupported_examples": ["bad claim"]},
+                      "citations": 7, "resolvable_citations": 7, "gap_statements": 1, "citation_coverage": 0.75, "unsupported_examples": ["bad claim"]},
         "quality": {"score": 0.8, "structure": 1, "executive_summary_words": 90, "section_count": 4, "coverage": 0.8,
                     "missing_topics": ["pricing"], "non_low_confidence_sections": "3/4", "source_domains": 5},
         "context": {"boundaries": 3, "boundaries_over_budget": 1, "cuts": 2, "tokens_saved": 1200},
@@ -118,3 +118,19 @@ def test_load_specs_filters_and_rejects_unknown_ids():
     assert len(run_eval.load_specs(None)) == 5
     with pytest.raises(SystemExit):
         run_eval.load_specs(["nope"])
+
+
+def test_statements_about_missing_evidence_are_not_scored_as_claims():
+    gap = [
+        "The source material outlines common SaaS pricing models, but it does not provide pricing details for payroll software.",
+        "Global venture funding totaled $425 billion in 2025, yet the evidence lacks any payroll-specific funding data.",
+        "The evidence describes general SaaS pricing models but provides no payroll-software-specific pricing data.",
+    ]
+    assert all(metrics.is_gap_statement(s) for s in gap)
+    assert not metrics.is_gap_statement("Acme raised $50 million in Series B funding led by Orbit Capital.")
+    assert not metrics.is_gap_statement("The market grew 12% last year across Europe.")
+
+    r = report(f"Acme raised $50 million in Series B funding led by Orbit Capital {CITE1}.", f"{gap[0]} {CITE2}")
+    out = metrics.citation_metrics(r, SOURCES, EVIDENCE)
+    assert out["cited_sentences"] == 1 and out["gap_statements"] == 1 and out["citation_accuracy"] == 1.0
+    assert out["citation_coverage"] == 1.0

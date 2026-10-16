@@ -122,3 +122,19 @@ def test_backoff_waits_at_least_the_providers_hint(monkeypatch):
 
     assert asyncio.run(llm.call_llm(limited, max_retries=3)) == "ok"
     assert sleeps and sleeps[0] >= 15.4
+
+
+def test_request_too_large_is_not_retried(monkeypatch):
+    async def no_sleep(_):
+        raise AssertionError("must not wait for an error that cannot clear")
+
+    monkeypatch.setattr(llm.asyncio, "sleep", no_sleep)
+    calls = []
+
+    async def too_big():
+        calls.append(1)
+        raise RuntimeError("Error code: 429 - Request too large for model x on output tokens per minute (OTPM)")
+
+    with pytest.raises(RuntimeError, match="too large"):
+        asyncio.run(llm.call_llm(too_big, max_retries=5))
+    assert len(calls) == 1

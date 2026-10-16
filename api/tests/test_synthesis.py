@@ -171,3 +171,19 @@ def test_stage_returns_evidence_and_sources_and_fails_when_empty(s):
     assert out["evidence"].items and r.source_id in out["sources"]
     with pytest.raises(RuntimeError):
         asyncio.run(stage({**state, "refs": []}))
+
+
+def test_a_source_the_model_cannot_parse_is_skipped_not_fatal(tmp_path, caplog):
+    s = Setup(tmp_path)
+    good = s.add("Good", "https://good.com/a", 0.8, "2026-05-01", ["Acme raised $50 million in Series B."])
+    bad = s.add("Bad", "https://bad.com/b", 0.8, "2026-05-01", [])
+
+    async def extractor(chunk):
+        if chunk["title"] == "Bad":
+            raise RuntimeError("Error code: 400 - tool_use_failed")
+        return s.claims[chunk["title"]]
+
+    with caplog.at_level("WARNING", logger="insightforge"):
+        res = asyncio.run(synthesize([good, bad], BRIEF, store=s.store, extractor=extractor, summarizer=shrink))
+    assert [i.claim for i in res.bundle.items] == ["Acme raised $50 million in Series B."]
+    assert "claim extraction failed" in caplog.text and "bad.com" in caplog.text

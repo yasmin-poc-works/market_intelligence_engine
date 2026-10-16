@@ -24,8 +24,15 @@ clear question), set clarifying_question to exactly ONE question and leave subta
 Otherwise leave clarifying_question empty and return 3 to {max_subtasks} subtasks.
 
 Each subtask is an independent, non-overlapping research angle with a short title, a concrete
-scope (what to find out), and a researcher: "web" (news, filings, articles), "document"
-(uploaded PDFs; only if documents were provided) or "entity" (companies, people, funding, figures).
+scope (what to find out), a search_query, and a researcher: "web" (news, filings, articles),
+"document" (uploaded PDFs; only if documents were provided) or "entity" (companies, people,
+funding, figures).
+
+Subtasks run in isolation: each researcher sees ONLY its own subtask, never the brief or the other
+subtasks. So every title and scope must be self-contained: name the industry or company, the
+geography and the time horizon explicitly, and never say "the vendors", "identified companies" or
+"as above". The search_query is a short web search (at most 12 words) that repeats the subject,
+geography and angle, for example: B2B payroll software Southeast Asia pricing 2025.
 Never include more than {max_subtasks} subtasks."""
 
 
@@ -33,6 +40,7 @@ class PlannedSubTask(BaseModel):
     title: str
     scope: str
     researcher: Literal["web", "document", "entity"] = "web"
+    search_query: str = ""
 
 
 class PlannerOutput(BaseModel):
@@ -125,6 +133,7 @@ async def plan_brief(
                     id=f"t{i}",
                     title=t.title,
                     scope=t.scope,
+                    search_query=t.search_query.strip()[:200] or None,
                     researcher="web" if t.researcher == "document" and not has_docs else t.researcher,
                 )
                 for i, t in enumerate(planned, 1)

@@ -37,6 +37,7 @@ class SubTask(BaseModel):
     title: str
     scope: str
     researcher: Literal["web", "document", "entity"] = "web"
+    search_query: str | None = Field(default=None, max_length=200)  # short, self-contained web query written by the planner
     status: Literal["pending", "running", "done", "failed"] = "pending"
     error: str | None = None
 

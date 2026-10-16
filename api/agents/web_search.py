@@ -24,7 +24,9 @@ Fetch = Callable[[str], Awaitable[FetchedPage]]
 
 
 def build_query(subtask: SubTask) -> str:
-    """Search query from the sub-task's own title and scope."""
+    """Search query from the sub-task alone: the planner's short query, else title and scope."""
+    if subtask.search_query and subtask.search_query.strip():
+        return subtask.search_query.strip()[:MAX_QUERY_CHARS]
     return f"{subtask.title} {subtask.scope}".strip()[:MAX_QUERY_CHARS]
 
 

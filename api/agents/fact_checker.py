@@ -48,8 +48,10 @@ async def fetch_page_text(url: str) -> str:
     """Default re-fetch: GET the page and strip markup."""
     import httpx
 
+    from tools.fetch import USER_AGENT  # same identity as the researcher: sites that served the page once serve it again
+
     async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
-        resp = await client.get(url, headers={"User-Agent": "InsightForge-FactChecker/0.1"})
+        resp = await client.get(url, headers={"User-Agent": USER_AGENT})
         resp.raise_for_status()
     html = re.sub(r"(?is)<(script|style|noscript)[^>]*>.*?</\1>", " ", resp.text)
     return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html)).strip()

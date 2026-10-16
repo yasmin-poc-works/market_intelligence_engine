@@ -97,6 +97,42 @@ def test_serpapi_parses_results_and_sends_params():
     assert seen["q"] == "acme funding" and seen["num"] == "5" and seen["api_key"] == "key"
 
 
+@pytest.fixture(autouse=True)
+def fast_search_retries(monkeypatch):
+    from tools import search as search_mod
+
+    monkeypatch.setattr(search_mod, "RETRY_DELAY", 0)
+
+
+def test_serpapi_retries_transient_failures_but_not_client_errors():
+    calls = []
+
+    def flaky(req):
+        calls.append(1)
+        if len(calls) == 1:
+            raise httpx.ReadTimeout("slow")
+        if len(calls) == 2:
+            return httpx.Response(503)
+        return httpx.Response(200, json={"organic_results": [{"title": "A", "link": "https://a.com/x"}]})
+
+    assert [r.url for r in asyncio.run(_serp(flaky).search("q"))] == ["https://a.com/x"]
+    assert len(calls) == 3
+
+    calls.clear()
+    with pytest.raises(SearchError, match="HTTP 401"):
+        asyncio.run(_serp(lambda r: (calls.append(1), httpx.Response(401))[1]).search("q"))
+    assert len(calls) == 1  # a bad key is not retried
+
+    calls.clear()
+    with pytest.raises(SearchError, match="ReadTimeout"):
+        def always(req):
+            calls.append(1)
+            raise httpx.ReadTimeout("slow")
+
+        asyncio.run(_serp(always).search("q"))
+    assert len(calls) == 3
+
+
 def test_serpapi_errors():
     with pytest.raises(SearchError, match="not set"):
         SerpApiProvider("")
@@ -216,6 +252,12 @@ def test_web_agent_fails_when_nothing_usable(tmp_path):
     empty = WebSearchAgent(FakeProvider([]), ScratchStore(tmp_path), _fetcher({}))
     with pytest.raises(RuntimeError, match="no results"):
         asyncio.run(empty.run(task()))
+
+
+def test_planner_query_is_used_when_present():
+    t = SubTask(id="t", title="Pricing", scope="each vendor's prices", search_query="B2B payroll software Southeast Asia pricing 2025")
+    assert build_query(t) == "B2B payroll software Southeast Asia pricing 2025"
+    assert build_query(t.model_copy(update={"search_query": "   "})) == "Pricing each vendor's prices"
 
 
 def test_query_is_built_from_the_subtask_only_and_bounded():

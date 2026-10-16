@@ -187,3 +187,27 @@ def test_unverified_marks_only_sentences_citing_failed_claims():
     assert report.sections[1].body.endswith("[UNVERIFIED]")
     assert "[UNVERIFIED]" not in report.sections[0].body
     assert "[UNVERIFIED]" not in report.executive_summary
+
+
+def test_report_title_is_the_first_sentence_cut_at_a_word_boundary():
+    from agents.writer import make_title
+
+    brief = "Summarize the competitive landscape for B2B payroll software in Southeast Asia. Focus on pricing, funding and gaps."
+    assert make_title(brief) == "Summarize the competitive landscape for B2B payroll software in Southeast Asia"
+    long = "Describe " + "very " * 40 + "long brief without a full stop"
+    title = make_title(long)
+    assert len(title) <= 103 and title.endswith("...") and not title[:-3].endswith(" ")
+    assert make_title("   ") == "Research report"
+
+
+def test_several_claims_from_one_source_cite_it_once():
+    from agents.writer import render_text
+
+    evidence = {
+        "E1": item(1, "Acme raised $50 million", ["s1"], Confidence.HIGH),
+        "E2": item(2, "Orbit Capital led the round", ["s1"], Confidence.HIGH),
+        "E3": item(3, "Demand doubled", ["s2"], Confidence.LOW),
+    }
+    out = render_text("Acme raised $50 million, led by Orbit Capital [E1] [E2] [E3].", evidence, SOURCES, set())
+    assert out.count("[Source: reuters.com") == 1
+    assert out.count("[Source: blog.io") == 1

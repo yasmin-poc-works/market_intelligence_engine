@@ -4,8 +4,9 @@ without any LLM or network.
 Three things are measured per brief (targets from the assignment where it sets one):
 
 * fact-check pass rate: taken from the Fact-Checker's own summary (target >= 80%)
-* citation accuracy: of the sentences that carry a citation, the share whose cited sources
-  really contain what the sentence says (same figures, most of the wording)
+* citation accuracy: of the factual sentences that carry a citation, the share whose cited sources
+  really contain what the sentence says (same figures, most of the wording); sentences that only
+  say the evidence is missing are counted apart
 * synthesis quality: automated proxies (structure, must-cover coverage, confidence mix, source
   diversity). They are proxies, not a human judgement; the report adds manual notes.
 """
@@ -21,6 +22,17 @@ _CITATION = re.compile(r"\[Source: ([^,\]]+), ([^,\]]+), credibility: ([\d.]+)\]
 _MARKS = re.compile(r"\[(?:Source:[^\]]*|UNVERIFIED|E\d+)\]")
 _STOP = set("a an the of in on at to for and or is are was were be been by with as from that this it its has have had".split())
 _NO_EVIDENCE = "No sufficiently supported evidence"
+# Sentences that honestly say the evidence is missing ("the evidence lacks payroll-specific data") carry a
+# citation but are not factual claims, so they are reported separately instead of being scored as claims.
+_GAP_STATEMENT = re.compile(
+    r"\b(?:evidence|source material|sources?|material|data)\b[^.]{0,60}?\b(?:does not|do not|lacks?|is limited|are limited|contains? no|provides? no)\b"
+    r"|\b(?:does not|do not) (?:provide|contain|include|identify|disclose)\b|\bprovides? no\b|\bno (?:payroll|specific|sufficient)\b",
+    re.IGNORECASE,
+)
+
+
+def is_gap_statement(sentence: str) -> bool:
+    return bool(_GAP_STATEMENT.search(_MARKS.sub("", sentence)))
 
 
 def words(text: str) -> set[str]:
@@ -65,11 +77,14 @@ def citation_metrics(report: dict[str, Any], sources: dict[str, dict], evidence:
                  if m.get("domain") == domain and ((m.get("published_date") or "")[:10] or "n.d.") == date]
         return exact or [sid for sid, m in sources.items() if m.get("domain") == domain]
 
-    cited = resolvable = total_citations = supported = 0
+    cited = resolvable = total_citations = supported = gap_statements = 0
     unsupported: list[str] = []
     for sentence in claims:
         cites = _CITATION.findall(sentence)
         if not cites:
+            continue
+        if is_gap_statement(sentence):
+            gap_statements += 1
             continue
         cited += 1
         total_citations += len(cites)
@@ -85,7 +100,8 @@ def citation_metrics(report: dict[str, Any], sources: dict[str, dict], evidence:
     return {
         "claim_sentences": len(claims),
         "cited_sentences": cited,
-        "citation_coverage": round(cited / len(claims), 3) if claims else 0.0,
+        "gap_statements": gap_statements,
+        "citation_coverage": round((cited + gap_statements) / len(claims), 3) if claims else 0.0,
         "citations": total_citations,
         "resolvable_citations": resolvable,
         "citation_accuracy": round(supported / cited, 3) if cited else 0.0,
