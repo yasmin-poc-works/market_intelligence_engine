@@ -10,6 +10,7 @@ from db import session as db_session
 from errors import install_error_handlers
 from routes import alerts, reports, research, watchlist
 from scheduler import WatchlistScheduler
+from services.share import jwt_secret
 
 log = logging.getLogger("insightforge")
 
@@ -35,6 +36,7 @@ def startup_sweep() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    jwt_secret()  # fail at start-up, not on the first share link
     init_db()
     startup_sweep()
     app.state.scheduler = build_scheduler()

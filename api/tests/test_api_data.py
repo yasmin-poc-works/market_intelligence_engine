@@ -222,3 +222,15 @@ def test_report_detail_includes_sources_and_evidence_for_citation_drawer(api):
     src = next(iter(body["sources"].values()))
     assert {"domain", "title", "published_date", "credibility_score"} <= src.keys()
     assert {"id", "claim", "source_ids"} <= body["evidence"][0].keys()
+
+
+def test_missing_or_placeholder_jwt_secret_is_refused(monkeypatch):
+    import pytest
+
+    from config import get_settings
+    from services.share import jwt_secret
+
+    for bad in ("", "change-me"):  # set on the settings object: an empty env var falls back to .env
+        monkeypatch.setattr(get_settings(), "jwt_secret", bad)
+        with pytest.raises(RuntimeError, match="JWT_SECRET"):
+            jwt_secret()

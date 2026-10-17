@@ -11,18 +11,32 @@ SCOPE = "report:read"
 ALGORITHM = "HS256"
 
 
+PLACEHOLDERS = {"", "change-me"}
+
+
+def jwt_secret() -> str:
+    """The signing key from JWT_SECRET; refuses to run with a missing or placeholder value."""
+    secret = get_settings().jwt_secret
+    if secret in PLACEHOLDERS:
+        raise RuntimeError(
+            "JWT_SECRET is not set. Generate one with: "
+            'python -c "import secrets; print(secrets.token_urlsafe(48))" and put it in .env'
+        )
+    return secret
+
+
 def create_share_token(report_id: str, now: datetime | None = None) -> tuple[str, datetime]:
     now = now or datetime.now(UTC)
     expires = now + SHARE_TTL
     payload = {"sub": report_id, "scope": SCOPE, "iat": now, "exp": expires}
-    return jwt.encode(payload, get_settings().jwt_secret, algorithm=ALGORITHM), expires
+    return jwt.encode(payload, jwt_secret(), algorithm=ALGORITHM), expires
 
 
 def decode_share_token(token: str) -> str:
     """Returns the report id, or raises a 401 ApiError."""
     try:
         payload = jwt.decode(
-            token, get_settings().jwt_secret, algorithms=[ALGORITHM], options={"require": ["exp", "sub"]}
+            token, jwt_secret(), algorithms=[ALGORITHM], options={"require": ["exp", "sub"]}
         )
     except jwt.ExpiredSignatureError:
         raise ApiError(401, "This share link has expired", "share_expired") from None

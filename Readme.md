@@ -117,7 +117,7 @@ Settings live in [api/config.py](api/config.py). Relative paths resolve against 
 | `FRONTEND_URL` | `http://localhost:3000` | Used in share links and webhook messages |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated browser origins |
 | `UPLOAD_PATH` | `data/uploads` | Uploaded and downloaded PDFs, one folder per run |
-| `JWT_SECRET` | placeholder | Signs 7-day share links; set a long random value before sharing any |
+| `JWT_SECRET` | none (required) | Signs 7-day share links. The API refuses to start without it; generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
 | `LANGSMITH_*` | off | Declared only |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Frontend setting, in `app/.env.local` |
 
@@ -261,7 +261,7 @@ One metric change was made after seeing results, and is stated here so it does n
 | `GET /reports/{id}/export.md`, `export.pdf` | Downloads |
 | `POST /reports/{id}/share`, `GET /share/{token}` | 7-day signed share link and its public read-only view |
 
-Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` before sharing links.
+Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); `JWT_SECRET` must be set in `.env` (the API will not start without it).
 
 **PDF links.** Instead of downloading a PDF and uploading it, paste its link. The server downloads it when the run starts and stores it with the uploads, so it is handled exactly like an uploaded file. Links must be `http(s)`, point directly at a PDF and be publicly reachable; private and local addresses are refused (including through redirects). A bad link rejects the whole request and starts no run.
 

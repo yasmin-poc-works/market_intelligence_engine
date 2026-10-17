@@ -28,6 +28,7 @@ def pinned_settings(monkeypatch):
         "LLM_MAX_CONCURRENCY": "3",
         "LLM_MAX_RETRIES": "5",
         "EVIDENCE_TOKEN_BUDGET": "6000",
+        "JWT_SECRET": "test-secret-not-used-anywhere-else-0123456789",
     }.items():
         monkeypatch.setenv(key, value)
     get_settings.cache_clear()

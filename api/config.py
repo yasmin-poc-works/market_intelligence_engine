@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     upload_path: str = "data/uploads"
 
     # Auth
-    jwt_secret: str = "b9bXOmdO5JnJtKI5Af1d_Wb3Z9w3ooCiI3SCNRkRydzy0la-RrRtbv38_rihxeC-"
+    jwt_secret: str = ""  # required: set JWT_SECRET in .env (signs share links)
 
     # Observability
     langsmith_tracing: bool = False
