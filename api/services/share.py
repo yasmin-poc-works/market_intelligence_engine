@@ -1,4 +1,6 @@
 """JWT share links: signed, scoped to one report, valid for 7 days."""
+import logging
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -6,23 +8,31 @@ import jwt
 from config import get_settings
 from errors import ApiError
 
+log = logging.getLogger("insightforge")
+
 SHARE_TTL = timedelta(days=7)
 SCOPE = "report:read"
 ALGORITHM = "HS256"
 
 
 PLACEHOLDERS = {"", "change-me"}
+_generated: str | None = None
 
 
 def jwt_secret() -> str:
-    """The signing key from JWT_SECRET; refuses to run with a missing or placeholder value."""
+    """The signing key from JWT_SECRET. If it is missing or a placeholder, a random key is made once
+    per process (with a warning): the API still starts, but share links stop working after a restart."""
+    global _generated
     secret = get_settings().jwt_secret
-    if secret in PLACEHOLDERS:
-        raise RuntimeError(
-            "JWT_SECRET is not set. Generate one with: "
-            'python -c "import secrets; print(secrets.token_urlsafe(48))" and put it in .env'
+    if secret not in PLACEHOLDERS:
+        return secret
+    if _generated is None:
+        _generated = secrets.token_urlsafe(48)
+        log.warning(
+            "JWT_SECRET is not set: using a random key for this run, so share links will not survive a restart. "
+            'Set JWT_SECRET in .env (python -c "import secrets; print(secrets.token_urlsafe(48))")'
         )
-    return secret
+    return _generated
 
 
 def create_share_token(report_id: str, now: datetime | None = None) -> tuple[str, datetime]:

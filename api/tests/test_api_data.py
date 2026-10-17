@@ -224,13 +224,15 @@ def test_report_detail_includes_sources_and_evidence_for_citation_drawer(api):
     assert {"id", "claim", "source_ids"} <= body["evidence"][0].keys()
 
 
-def test_missing_or_placeholder_jwt_secret_is_refused(monkeypatch):
-    import pytest
-
+def test_missing_jwt_secret_falls_back_to_a_random_key_that_still_works(monkeypatch):
     from config import get_settings
-    from services.share import jwt_secret
+    from services import share
 
+    monkeypatch.setattr(share, "_generated", None)
     for bad in ("", "change-me"):  # set on the settings object: an empty env var falls back to .env
         monkeypatch.setattr(get_settings(), "jwt_secret", bad)
-        with pytest.raises(RuntimeError, match="JWT_SECRET"):
-            jwt_secret()
+        key = share.jwt_secret()
+        assert key not in share.PLACEHOLDERS and len(key) >= 32
+        assert share.jwt_secret() == key  # stable for the life of the process
+        token, _ = share.create_share_token("r1")
+        assert share.decode_share_token(token) == "r1"
