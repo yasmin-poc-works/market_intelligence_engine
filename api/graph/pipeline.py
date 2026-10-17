@@ -6,6 +6,7 @@ handling: one failed researcher is recorded and the run continues; the run fails
 every researcher fails. Synthesis, writing and fact-checking are injected (Phase 4); the
 defaults are pass-through placeholders.
 """
+import logging
 import operator
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -19,6 +20,8 @@ from agents.researchers import run_researcher
 from graph.events import EventRecorder
 from graph.run_context import current_run_id
 from schemas import ResearchBrief, RunStatus, SourceRef, SubTask, TaskGraph
+
+log = logging.getLogger("insightforge")
 
 
 def _merge(a: dict, b: dict) -> dict:
@@ -45,6 +48,12 @@ class GraphState(TypedDict, total=False):
 
 
 Stage = Callable[[GraphState], Awaitable[dict[str, Any]]]
+# user-supplied web pages -> (stored refs, [(url, reason it was skipped)])
+ReferenceLoader = Callable[[list[str]], Awaitable[tuple[list[SourceRef], list[tuple[str, str]]]]]
+
+
+async def _no_references(urls: list[str]) -> tuple[list[SourceRef], list[tuple[str, str]]]:
+    return [], []
 
 
 async def _passthrough(state: GraphState) -> dict[str, Any]:
@@ -56,6 +65,7 @@ class PipelineDeps:
     recorder: EventRecorder
     planner: Callable[..., Awaitable[PlanResult]] = plan_brief
     researcher: Callable[[SubTask], Awaitable[list[SourceRef]]] = run_researcher
+    references: ReferenceLoader = _no_references
     synthesize: Stage = _passthrough
     write: Stage = _passthrough
     fact_check: Stage = _passthrough
@@ -71,6 +81,7 @@ def build_graph(deps: PipelineDeps):
         try:
             result = await deps.planner(state["brief"], memory_block=state.get("memory_block", ""))
         except Exception as exc:
+            log.exception("run %s: planning failed", run_id)
             rec.set_status(run_id, RunStatus.FAILED, str(exc))
             return {"status": RunStatus.FAILED, "error": str(exc)}
         if result.clarifying_question:
@@ -80,11 +91,25 @@ def build_graph(deps: PipelineDeps):
         graph = result.task_graph
         rec.record(run_id, "task_graph_created", payload=graph.model_dump())
         rec.set_status(run_id, RunStatus.RESEARCHING)
-        return {
+        update: dict[str, Any] = {
             "status": RunStatus.RESEARCHING,
             "task_graph": graph,
             "subtask_status": {t.id: "pending" for t in graph.subtasks},
         }
+        urls = state["brief"].reference_urls
+        if urls:  # pages the user supplied are sources whatever the sub-tasks search for
+            try:
+                refs, skipped = await deps.references(urls)
+            except Exception as exc:
+                log.exception("run %s: loading reference pages failed", run_id)
+                refs, skipped = [], [(u, f"{type(exc).__name__}") for u in urls]
+            rec.record(
+                run_id,
+                "references_loaded",
+                payload={"loaded": len(refs), "skipped": [{"url": u, "reason": r} for u, r in skipped]},
+            )
+            update["refs"] = refs
+        return update
 
     def after_plan(state: GraphState):
         if state.get("status") != RunStatus.RESEARCHING:
@@ -98,6 +123,7 @@ def build_graph(deps: PipelineDeps):
         try:
             refs = await deps.researcher(task)
         except Exception as exc:  # isolate branch failures
+            log.exception("run %s: subtask %s failed", run_id, task.id)
             rec.record(run_id, "subtask_failed", task.id, {"error": str(exc)})
             return {"subtask_status": {task.id: "failed"}, "errors": [f"{task.id}: {exc}"]}
         rec.record(run_id, "subtask_done", task.id, {"refs": len(refs)})
@@ -109,6 +135,9 @@ def build_graph(deps: PipelineDeps):
             msg = "all research tasks failed: " + "; ".join(state.get("errors", []))
             rec.set_status(state["run_id"], RunStatus.FAILED, msg)
             return {"status": RunStatus.FAILED, "error": msg}
+        web_ids = [r.source_id for r in state.get("refs", []) if r.kind == "web"]
+        if web_ids:
+            rec.save_source_ids(state["run_id"], web_ids)
         return {}
 
     def after_join(state: GraphState):
@@ -120,8 +149,9 @@ def build_graph(deps: PipelineDeps):
             try:
                 update = await fn(state)
             except Exception as exc:
-                rec.set_status(state["run_id"], RunStatus.FAILED, str(exc))
-                return {"status": RunStatus.FAILED, "error": str(exc)}
+                log.exception("run %s: %s stage failed", state["run_id"], name.value)
+                rec.set_status(state["run_id"], RunStatus.FAILED, f"{name.value} failed: {exc}")
+                return {"status": RunStatus.FAILED, "error": f"{name.value} failed: {exc}"}
             return {**update, "status": name}
 
         return node
@@ -158,9 +188,14 @@ def build_graph(deps: PipelineDeps):
 
 
 async def run_pipeline(
-    run_id: str, brief: ResearchBrief, deps: PipelineDeps, memory_block: str = ""
+    run_id: str,
+    brief: ResearchBrief,
+    deps: PipelineDeps,
+    memory_block: str = "",
+    seed_refs: list[SourceRef] | None = None,
 ) -> GraphState:
+    """seed_refs: sources from an earlier, related run that this run may build on."""
     graph = build_graph(deps)
     return await graph.ainvoke(
-        {"run_id": run_id, "brief": brief, "memory_block": memory_block, "refs": [], "errors": []}
+        {"run_id": run_id, "brief": brief, "memory_block": memory_block, "refs": list(seed_refs or []), "errors": []}
     )

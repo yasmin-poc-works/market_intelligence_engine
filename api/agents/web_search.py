@@ -62,6 +62,13 @@ class WebSearchAgent:
 
     async def search_and_store(self, subtask: SubTask) -> WebSearchOutcome:
         hits = await self._provider.search(build_query(subtask), self._top_k)
+        return await self._store_hits(hits[: self._top_k])
+
+    async def fetch_urls(self, urls: list[str]) -> WebSearchOutcome:
+        """Fetch pages the user supplied and store them like search results."""
+        return await self._store_hits([SearchResult(title=u, url=u) for u in dict.fromkeys(urls)])
+
+    async def _store_hits(self, hits: list[SearchResult]) -> WebSearchOutcome:
         outcome = WebSearchOutcome()
 
         async def one(hit: SearchResult) -> SourceRef | None:
@@ -87,7 +94,7 @@ class WebSearchAgent:
             )
             return SourceRef(source_id=source_id, summary=one_line_summary(page, hit), kind="web", url=page.url)
 
-        results = await asyncio.gather(*(one(h) for h in hits[: self._top_k]))
+        results = await asyncio.gather(*(one(h) for h in hits))
         outcome.refs = [r for r in results if r is not None]
         return outcome
 

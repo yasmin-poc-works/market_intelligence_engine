@@ -4,6 +4,7 @@ The LLM cites evidence by id ("[E3]"); code verifies every statement is grounded
 cited evidence (retrying with explicit constraints on violations) and only then resolves
 the markers into "[Source: {domain}, {date}, credibility: {score}]" citations.
 """
+import json
 import re
 import uuid
 from collections.abc import Awaitable, Callable
@@ -164,12 +165,23 @@ def make_title(brief: str, limit: int = 100) -> str:
     return first[:limit].rsplit(" ", 1)[0].rstrip(" ,;:") + "..."
 
 
+def parse_writer_output(raw: object) -> WriterOutput:
+    """Validate model JSON; some models wrap the values in a schema-shaped {"properties": {...}} object."""
+    data = json.loads(raw) if isinstance(raw, str) else raw
+    if isinstance(data, dict) and "executive_summary" not in data and isinstance(data.get("properties"), dict):
+        data = data["properties"]
+    return WriterOutput.model_validate(data)
+
+
 def make_llm_generator() -> Generate:
-    model = make_chat_model("writer").with_structured_output(WriterOutput, method="json_schema")
+    model = make_chat_model("writer").with_structured_output(WriterOutput, method="json_schema", include_raw=True)
 
     async def generate(prompt: str) -> WriterOutput:
-        out = await call_llm(lambda: model.ainvoke(prompt))
-        return out if isinstance(out, WriterOutput) else WriterOutput.model_validate(out)
+        result = await call_llm(lambda: model.ainvoke(prompt))
+        parsed = result.get("parsed")
+        if isinstance(parsed, WriterOutput):
+            return parsed
+        return parse_writer_output(result["raw"].content)  # recover from a malformed-but-salvageable reply
 
     return generate
 

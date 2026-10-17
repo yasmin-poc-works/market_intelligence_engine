@@ -108,6 +108,9 @@ Settings live in [api/config.py](api/config.py). Relative paths resolve against 
 | `QDRANT_URL`, `QDRANT_API_KEY` | empty | Use a remote Qdrant instead |
 | `DATABASE_URL` | `sqlite:///data/insightforge.db` | SQLite, WAL mode |
 | `SCRATCH_PATH` | `data/scratch` | Scratch store folder |
+| `RETENTION_HOURS` | `24` | How long a run's stored pages, uploads and Qdrant data are kept |
+| `REUSE_SOURCES` | `true` | Reuse the last run's sources for a related brief; clear old data for an unrelated one |
+| `RELATED_BRIEF_THRESHOLD` | `0.45` | Minimum embedding similarity for "same topic or follow-up" |
 | `EVIDENCE_TOKEN_BUDGET` | `6000` in code, `4000` in the example | Token budget for the evidence bundle |
 | `MAX_PARALLEL_SUBTASKS` | `6` in code, `3` in the example | Cap on planner sub-tasks (3 to 6) |
 | `SCHEDULER_ENABLED` | `true` | In-process watchlist scheduler |
@@ -159,6 +162,18 @@ The pipeline is designed so that no agent ever holds more context than its job n
 Raw source content never lives in conversation history. Web researchers write each fetched article to the scratch store, [api/context/scratch_store.py](api/context/scratch_store.py): one JSON file per source under `data/scratch/`, named by a random 32-character hex `source_id` (so ids cannot be used for path traversal), written atomically. A record holds `{url, title, published_date, body_text, credibility_score, byline}`. Article text is trimmed to `SOURCE_MAX_CHARS` (6,000) when stored. PDF passages go to Qdrant `doc_chunks` and entities to `entities`, scoped by run id.
 
 A researcher returns a `SourceRef` (`source_id` plus a summary of at most 300 characters), never the content. The Synthesis stage is the only place references are resolved back to text, one source at a time, in chunks of at most 3,000 tokens.
+
+### Reuse and cleanup across runs
+
+Stored run data (scratch pages, uploaded PDFs, Qdrant passages and entities) is not kept forever. [api/services/retention.py](api/services/retention.py) runs at the start of every run and at API start-up:
+
+- **Related brief** (same topic or a follow-up of the most recent finished run, within `RETENTION_HOURS`): the new run starts with that run's saved web pages as extra sources and gets a copy of its PDFs. Web search still runs. The progress log shows `sources_reused`. Relatedness is the cosine similarity of the new brief to the earlier brief and to that run's report summary, using the same embedding model as Qdrant.
+- **Unrelated brief:** the stored data of all earlier finished runs is deleted first (`storage_cleaned` in the log). A page file is deleted only when no kept run lists it, and data of runs still in progress is never touched.
+- **Older than `RETENTION_HOURS`:** deleted by the same sweep, uploads included.
+- **Never deleted:** the database (runs, events, run log, reports, evidence, sources), so past reports and run logs stay readable. Only the raw stored material goes, so an old run can no longer be re-fact-checked against its stored pages.
+- Answering a clarifying question never clears data, and a brief too short to be understood (the planner is about to ask a question) is judged on the answer.
+
+The default threshold was set from real embeddings: different sample briefs scored 0.14 to 0.27, and reworded or follow-up briefs about the same subject scored 0.57 to 0.89. A bare follow-up such as "What about their pricing?" scores about 0.24, indistinguishable from an unrelated topic; it is short enough that the planner asks a question, and the answer is then judged. A follow-up that is long enough to skip the question but names no subject can be misjudged as a new topic and clear the old data.
 
 ### Isolation
 
@@ -236,8 +251,8 @@ One metric change was made after seeing results, and is stated here so it does n
 
 | Method and path | Purpose |
 |---|---|
-| `POST /research/run` | Start a run (multipart form: `brief`, `files` and/or `document_urls` (links to PDFs), up to 10 documents of 20 MB each in total, `include_web`, `include_documents`, `clarification`) |
-| `GET /research/runs/{id}` | Run status, brief, error, clarifying question, `report_id` |
+| `POST /research/run` | Start a run (multipart form: `brief`, `files` and/or `document_urls` (links to PDFs), up to 10 documents of 20 MB each in total, `reference_urls` (web pages, up to 10), `include_web`, `include_documents`, `clarification`, `previous_run_id`) |
+| `GET /research/runs/{id}` | Run status, brief, error, clarifying question, documents, reference pages, `report_id` |
 | `GET /research/status/{id}` | Server-sent events for live progress (supports `Last-Event-ID`) |
 | `GET/POST /watchlist`, `GET/PATCH/DELETE /watchlist/{id}` | Watchlist CRUD (changes sync the scheduler job) |
 | `POST /watchlist/{id}/run` | Run a watchlist item now (202); diff and alert follow as for scheduled runs |
@@ -249,6 +264,10 @@ One metric change was made after seeing results, and is stated here so it does n
 Errors always use `{"error": {"code", "message", "details"?}}`. There is no user authentication (single-user capstone); set a long random `JWT_SECRET` before sharing links.
 
 **PDF links.** Instead of downloading a PDF and uploading it, paste its link. The server downloads it when the run starts and stores it with the uploads, so it is handled exactly like an uploaded file. Links must be `http(s)`, point directly at a PDF and be publicly reachable; private and local addresses are refused (including through redirects). A bad link rejects the whole request and starts no run.
+
+**Reference web pages.** `reference_urls` are ordinary web pages (articles, reports) you want used as sources in addition to the web search. The server fetches them once, right after planning, and stores them like search results, so they are cited and fact-checked the same way. Pages behind a paywall or login are skipped; the run's event stream shows a `references_loaded` event listing what was loaded and what was skipped.
+
+**Answering a clarifying question.** Pass `previous_run_id` and the new run reuses the first submission's PDFs, PDF links and reference pages (you can add more); the web form does this automatically.
 
 **Watchlist monitoring.** On startup the API schedules every active watchlist item (daily or weekly) in-process, so run it with a single worker. Each run researches the topic, then the Diff Agent compares the new report with the previous one for that item (sentence matching with citations stripped; rephrasing with the same figures is ignored; an LLM judge drops leftover rephrasings). The first run is the baseline. A material change (a changed figure, an added or removed finding with figures, or 3+ added or removed findings) creates an in-app alert and, if the item has a `webhook_url`, POSTs a Slack-compatible `{"text": ...}` message (3 attempts with backoff; failures are logged, never fatal).
 
@@ -308,5 +327,6 @@ Groq (`gpt-oss-120b`) via `langchain-groq` · SerpAPI · DeepAgents (planner) ·
 - **Evaluation coverage.** One of five briefs has real results (see above); the document-based brief needs PDFs you supply.
 - **Confidence labels are conservative.** A single source below 0.7 credibility is LOW, and typical vendor and news sites score 0.5 to 0.7, so most sections come out LOW. Domain credibility tuning is a listed bonus, not done.
 - **Fact-checking depends on re-fetching.** Sites that block automated fetching count as unverified, and about one source in four could not be re-fetched in the analysis.
+- **Topic detection is a similarity guess.** See "Reuse and cleanup across runs". Set `REUSE_SOURCES=false` to turn reuse and the unrelated-topic cleanup off (the age-based sweep still applies).
 - **PDF export** uses core Latin-1 fonts, so non-Latin text becomes `?`.
-- **Not built:** LangSmith tracing and the other bonus items (see [planning/task.md](planning/task.md)); the demo video and public repository.
+- **Not built:** LangSmith tracing and the other bonus items (see [planning/task.md](planning/task.md)); the public repository (the demo video is recorded; add its link here when published).

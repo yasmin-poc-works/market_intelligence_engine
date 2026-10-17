@@ -62,6 +62,18 @@ class VectorStore:
             )
         self._ready.add(name)
 
+    def delete_run(self, run_id: str) -> int:
+        """Remove every point (document passages, entities, relationships) a run stored; returns the count."""
+        removed = 0
+        with self._lock:
+            for name in (DOC_COLLECTION, ENTITY_COLLECTION):
+                if not self.client.collection_exists(name):
+                    continue
+                flt = _run_filter(run_id)
+                removed += self.client.count(name, count_filter=flt, exact=True).count
+                self.client.delete(name, points_selector=models.FilterSelector(filter=flt))
+        return removed
+
     # ----- document chunks -----
     def has_documents(self, run_id: str, filename: str) -> bool:
         with self._lock:

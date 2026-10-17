@@ -80,6 +80,8 @@ export interface RunInfo {
   status: RunStatus;
   error: string | null;
   clarifying_question: string | null;
+  documents?: string[];
+  reference_urls?: string[];
   report_id: string | null;
   created_at: string;
   completed_at: string | null;

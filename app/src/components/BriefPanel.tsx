@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { API_URL, ApiError, errorMessage } from "@/lib/api";
+import { API_URL, ApiError, errorMessage, type RunInfo } from "@/lib/api";
 import { buttonClass, Card, ErrorNote, ghostButtonClass } from "./ui";
 
 const MAX_CHARS = 500;
@@ -28,9 +28,12 @@ export function estimateMinutes(chars: number, files: number, web: boolean, docs
 export default function BriefPanel({
   initialBrief = "",
   clarification,
+  previous,
 }: {
   initialBrief?: string;
   clarification?: string;
+  /** The run that asked for clarification: its documents and reference pages are reused. */
+  previous?: RunInfo;
 }) {
   const router = useRouter();
   const [brief, setBrief] = useState(initialBrief);
@@ -44,6 +47,11 @@ export default function BriefPanel({
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
   const [linkNote, setLinkNote] = useState<string | null>(null);
+  const [pages, setPages] = useState<string[]>([]);
+  const [pageInput, setPageInput] = useState("");
+  const [pageNote, setPageNote] = useState<string | null>(null);
+  const keptDocs = previous?.documents ?? [];
+  const keptPages = previous?.reference_urls ?? [];
   const inputRef = useRef<HTMLInputElement>(null);
 
   function addFiles(list: FileList | File[]) {
@@ -96,6 +104,29 @@ export default function BriefPanel({
     }
   }
 
+  function addPage() {
+    const value = pageInput.trim();
+    if (!value) return;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      setPageNote("That is not a valid link. Paste the full address, starting with https://");
+      return;
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      setPageNote("Only http(s) links are supported");
+    } else if (pages.includes(url.href) || keptPages.includes(url.href)) {
+      setPageNote("That page is already added");
+    } else if (pages.length + keptPages.length >= MAX_FILES) {
+      setPageNote(`At most ${MAX_FILES} reference pages`);
+    } else {
+      setPages([...pages, url.href]);
+      setPageInput("");
+      setPageNote(null);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -106,6 +137,8 @@ export default function BriefPanel({
       form.append("include_web", String(includeWeb));
       form.append("include_documents", String(includeDocs));
       if (clarification) form.append("clarification", clarification);
+      if (previous) form.append("previous_run_id", previous.run_id);
+      pages.forEach((u) => form.append("reference_urls", u));
       if (includeDocs) {
         files.forEach((f) => form.append("files", f));
         links.forEach((u) => form.append("document_urls", u));
@@ -126,7 +159,7 @@ export default function BriefPanel({
   }
 
   const count = brief.length;
-  const docCount = files.length + links.length;
+  const docCount = files.length + links.length + keptDocs.length;
   const { lo, hi } = estimateMinutes(count, docCount, includeWeb, includeDocs);
   const canSubmit = brief.trim().length > 0 && count <= MAX_CHARS && (includeWeb || (includeDocs && docCount > 0)) && !busy;
 
@@ -271,6 +304,68 @@ export default function BriefPanel({
               </ul>
             )}
           </div>
+        )}
+
+        <div>
+          <label htmlFor="page-link" className="mb-1 block text-sm font-medium">
+            Reference web pages (optional)
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="page-link"
+              type="url"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addPage();
+                }
+              }}
+              placeholder="https://example.com/article"
+              className="min-w-0 flex-1 rounded-md border border-line bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+            />
+            <button type="button" onClick={addPage} disabled={!pageInput.trim()} className={ghostButtonClass}>
+              Add page
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-muted">
+            Articles or pages you want used as sources, in addition to the web search. Pages behind a paywall or login are skipped.
+          </p>
+          {pageNote && <p className="mt-1 text-xs text-warn">{pageNote}</p>}
+          {(keptPages.length > 0 || pages.length > 0) && (
+            <ul className="mt-3 space-y-1 text-sm">
+              {keptPages.map((u) => (
+                <li key={u} className="flex items-center justify-between rounded border border-line px-3 py-1.5">
+                  <span className="truncate" title={u}>
+                    {u}
+                  </span>
+                  <span className="ml-3 shrink-0 text-xs text-muted">from your first submission</span>
+                </li>
+              ))}
+              {pages.map((u) => (
+                <li key={u} className="flex items-center justify-between rounded border border-line px-3 py-1.5">
+                  <span className="truncate" title={u}>
+                    {u}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPages(pages.filter((x) => x !== u))}
+                    className="ml-3 shrink-0 text-xs text-muted hover:text-bad"
+                    aria-label={`Remove ${u}`}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {keptDocs.length > 0 && (
+          <p className="text-xs text-muted">
+            Documents from your first submission will be reused: {keptDocs.join(", ")}.
+          </p>
         )}
 
         {!includeWeb && !(includeDocs && docCount > 0) && (

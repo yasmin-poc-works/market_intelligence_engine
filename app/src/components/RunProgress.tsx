@@ -50,6 +50,9 @@ const EVENT_NAMES = [
   "subtask_done",
   "subtask_failed",
   "clarification_requested",
+  "references_loaded",
+  "sources_reused",
+  "storage_cleaned",
 ];
 
 const TERMINAL: RunStatus[] = ["COMPLETE", "FAILED", "NEEDS_CLARIFICATION"];
@@ -97,6 +100,21 @@ function reduce(state: State, ev: StreamEvent): State {
     case "clarification_requested":
       text = "The planner needs more detail";
       break;
+    case "sources_reused":
+      text = `Building on an earlier, related run: ${payload.web_pages ?? 0} saved web pages and ${payload.documents ?? 0} documents reused`;
+      break;
+    case "storage_cleaned":
+      text = `Cleared stored data from earlier runs (${payload.reason}): ${payload.files ?? 0} pages, ${payload.uploads ?? 0} uploads`;
+      break;
+    case "references_loaded": {
+      const skipped = (payload.skipped as { url: string; reason: string }[]) ?? [];
+      text = `Your reference pages: ${payload.loaded ?? 0} loaded`;
+      if (skipped.length) {
+        text += `, ${skipped.length} skipped (${skipped.map((s) => `${s.url}: ${s.reason}`).join("; ")})`;
+        tone = "bad";
+      }
+      break;
+    }
   }
   return { status, tasks, seen, log: [...state.log, { eventId: ev.eventId, at, text, tone }] };
 }
@@ -319,7 +337,7 @@ function ClarificationForm({ run }: { run: RunInfo }) {
         className="w-full rounded-md border border-line bg-background px-3 py-2 text-sm outline-none focus:border-accent"
       />
       {answer.trim() ? (
-        <BriefPanel initialBrief={run.brief.slice(0, 500)} clarification={answer.trim()} />
+        <BriefPanel initialBrief={run.brief.slice(0, 500)} clarification={answer.trim()} previous={run} />
       ) : (
         <p className="text-xs text-muted">Type an answer to continue with the same brief.</p>
       )}

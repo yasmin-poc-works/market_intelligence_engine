@@ -196,3 +196,67 @@ def test_unknown_run_is_404(api):
     for url in ["/research/status/nope", "/research/runs/nope"]:
         r = api.client.get(url)
         assert r.status_code == 404 and r.json()["error"]["code"] == "not_found"
+
+
+# ---------- reference web pages and continued runs ----------
+def test_reference_urls_are_stored_and_reported(api):
+    pages = ["https://example.com/a", "https://example.com/b", "https://example.com/a"]
+    run_id = api.run_brief(reference_urls=pages).json()["run_id"]
+    with api.sf() as db:
+        assert db.get(Run, run_id).options["reference_urls"] == pages[:2]
+    assert api.client.get(f"/research/runs/{run_id}").json()["reference_urls"] == pages[:2]
+
+
+def test_invalid_reference_url_rejected(api):
+    r = api.run_brief(reference_urls=["not a link"])
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_url"
+
+
+def test_reference_pages_become_sources_and_failures_are_reported(api):
+    from schemas import SourceRef
+
+    base = make_deps_factory(api.tmp_path)
+
+    def factory(rec):
+        deps = base(rec)
+
+        async def references(urls):
+            ref = SourceRef(source_id="ref1", summary="user page", kind="web", url=urls[0])
+            return [ref], [(urls[1], "paywall or login wall")]
+
+        deps.references = references
+        return deps
+
+    app.dependency_overrides[get_deps_factory] = lambda: factory
+    run_id = api.run_brief(reference_urls=["https://a.example.com/x", "https://b.example.com/y"]).json()["run_id"]
+    events = {e.event: e.payload for e in research.EventRecorder(api.sf).list_events(run_id)}
+    assert events["references_loaded"] == {
+        "loaded": 1,
+        "skipped": [{"url": "https://b.example.com/y", "reason": "paywall or login wall"}],
+    }
+
+
+def test_answering_clarification_keeps_documents_and_pages(api):
+    first = api.run_brief(
+        "AI stuff",
+        files=[("files", ("report.pdf", PDF, "application/pdf"))],
+        reference_urls=["https://example.com/ref"],
+    ).json()["run_id"]
+    assert api.client.get(f"/research/runs/{first}").json()["status"] == "NEEDS_CLARIFICATION"
+
+    second = api.run_brief(
+        "AI stuff",
+        clarification="Generative AI chip startups in 2026",
+        previous_run_id=first,
+        files=[("files", ("extra.pdf", PDF, "application/pdf"))],
+    ).json()["run_id"]
+    info = api.client.get(f"/research/runs/{second}").json()
+    assert info["status"] == "COMPLETE"
+    assert info["reference_urls"] == ["https://example.com/ref"]
+    assert info["documents"] == ["report.pdf", "extra.pdf"]
+    stored = sorted(p.name for p in (api.tmp_path / "uploads" / second).iterdir())
+    assert len(stored) == 2
+
+
+def test_unknown_previous_run_is_404(api):
+    assert api.run_brief(previous_run_id="nope").status_code == 404

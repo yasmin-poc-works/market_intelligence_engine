@@ -6,6 +6,7 @@ from agents.writer import (
     ReportDraft,
     WriterOutput,
     check_sentence,
+    parse_writer_output,
     render_report,
     split_sentences,
     write_report,
@@ -211,3 +212,10 @@ def test_several_claims_from_one_source_cite_it_once():
     out = render_text("Acme raised $50 million, led by Orbit Capital [E1] [E2] [E3].", evidence, SOURCES, set())
     assert out.count("[Source: reuters.com") == 1
     assert out.count("[Source: blog.io") == 1
+
+
+def test_parse_writer_output_unwraps_schema_shaped_reply():
+    wrapped = '{"description": "", "properties": {"executive_summary": "S [E1].", "sections": [{"heading": "H", "body": "B"}]}, "type": "object"}'
+    out = parse_writer_output(wrapped)
+    assert out.executive_summary == "S [E1]."
+    assert out.sections[0].heading == "H"

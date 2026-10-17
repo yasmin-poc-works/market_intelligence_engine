@@ -27,6 +27,7 @@ class RunStatus(StrEnum):
 class ResearchBrief(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
     document_ids: list[str] = Field(default_factory=list, max_length=10)
+    reference_urls: list[str] = Field(default_factory=list, max_length=10)  # web pages the user wants used as sources
     include_web: bool = True
     include_documents: bool = True
     clarification: str | None = None

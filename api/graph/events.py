@@ -52,6 +52,15 @@ class EventRecorder:
                 )
             )
 
+    def save_source_ids(self, run_id: str, source_ids: list[str]) -> None:
+        """Remember which stored web pages this run used, so cleanup keeps them while the run is kept."""
+        with self._sf() as db:
+            run = db.get(Run, run_id)
+            if run is None:
+                raise KeyError(f"run not found: {run_id}")
+            run.options = {**(run.options or {}), "source_ids": list(dict.fromkeys(source_ids))}
+            db.commit()
+
     def save_run_log(self, run_id: str, run_log) -> None:
         with self._sf() as db:
             run = db.get(Run, run_id)

@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///data/insightforge.db"
     scratch_path: str = "data/scratch"
 
+    # Retention: related follow-up briefs reuse the last run's sources; an unrelated brief clears old run data
+    retention_hours: float = Field(24, gt=0)
+    reuse_sources: bool = True
+    related_brief_threshold: float = Field(0.45, ge=0, le=1)
+
     # Pipeline
     evidence_token_budget: int = Field(6000, gt=0)
     max_parallel_subtasks: int = Field(6, ge=1, le=6)

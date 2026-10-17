@@ -1,5 +1,6 @@
 """PDF upload and PDF-link validation and storage (<= 10 documents in total, <= 20 MB each)."""
 import re
+import shutil
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlparse
@@ -82,7 +83,27 @@ async def save_pdf_links(urls: list[str], fetcher: PdfFetcher, dest: Path, start
     return names
 
 
-async def save_pdfs(files: list[UploadFile], dest: Path) -> list[str]:
+def copy_documents(src: Path, dest: Path, names: list[str], rename_clashes: bool = False) -> list[str]:
+    """Copy stored PDFs from one run's folder to another's; returns the names they have there."""
+    copied: list[str] = []
+    for name in names:
+        file = src / name
+        if not file.is_file():
+            continue
+        dest.mkdir(parents=True, exist_ok=True)
+        target = name
+        if rename_clashes:
+            plain = re.sub(r"^\d+_", "", name)
+            n = 0
+            while (dest / target).exists():
+                n += 1
+                target = f"{n}_{plain}"  # clash with a file already in this run: take the next free index
+        shutil.copy2(file, dest / target)
+        copied.append(target)
+    return copied
+
+
+async def save_pdfs(files: list[UploadFile], dest: Path, start_index: int = 0) -> list[str]:
     """Validate and store the PDFs; returns stored file names (used as document ids)."""
     files = [f for f in files if f.filename]  # browsers send an empty part when nothing is chosen
     if len(files) > MAX_FILES:
@@ -100,7 +121,7 @@ async def save_pdfs(files: list[UploadFile], dest: Path) -> list[str]:
     names: list[str] = []
     if payloads:
         dest.mkdir(parents=True, exist_ok=True)
-    for i, (name, data) in enumerate(payloads, 1):
+    for i, (name, data) in enumerate(payloads, start_index + 1):
         unique = f"{i}_{name}"  # avoids clashes between same-named uploads
         (dest / unique).write_bytes(data)
         names.append(unique)

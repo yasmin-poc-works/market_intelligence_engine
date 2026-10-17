@@ -24,6 +24,12 @@ def get_pdf_fetcher():
     return fetch_pdf
 
 
+def get_retention():
+    from services.retention import build_retention
+
+    return build_retention()
+
+
 def get_deps_factory() -> DepsFactory:
     from services.pipeline_factory import build_deps
 

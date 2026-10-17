@@ -1,4 +1,5 @@
 """Runs one research pipeline to completion (called as a FastAPI background task)."""
+import asyncio
 import logging
 
 from context.memory_store import load_recent_summaries, render_memory_block, save_session_summary
@@ -6,6 +7,7 @@ from db.models import Run
 from graph.events import EventRecorder
 from graph.pipeline import run_pipeline
 from schemas import ResearchBrief, RunStatus
+from services.retention import Retention
 
 log = logging.getLogger("insightforge")
 
@@ -33,12 +35,26 @@ def _lazy_llm_summarizer(text: str, target_tokens: int) -> str:
     return make_llm_summarizer()(text, target_tokens)
 
 
-async def execute_run(run_id: str, brief: ResearchBrief, deps_factory, session_factory) -> None:
+async def execute_run(
+    run_id: str,
+    brief: ResearchBrief,
+    deps_factory,
+    session_factory,
+    retention: Retention | None = None,
+    continued: bool = False,
+) -> None:
     rec = EventRecorder(session_factory)
     try:
+        seeds = []
+        if retention is not None:  # reuse a related run's sources, or clear old data for a new topic
+            try:
+                prepared = await asyncio.to_thread(retention.prepare, run_id, brief, rec, continued)
+                seeds, brief = prepared.seeds, prepared.brief or brief
+            except Exception:  # housekeeping must never stop a research run
+                log.exception("run %s: source reuse / cleanup failed", run_id)
         with session_factory() as db:
             memory = render_memory_block(load_recent_summaries(db))
-        final = await run_pipeline(run_id, brief, deps_factory(rec), memory)
+        final = await run_pipeline(run_id, brief, deps_factory(rec), memory, seeds)
         report = final.get("report")
         if final.get("status") == RunStatus.COMPLETE and report is not None:
             with session_factory() as db:

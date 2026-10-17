@@ -48,9 +48,14 @@ def build_deps(recorder: EventRecorder) -> PipelineDeps:
             return payload["text"]
         return await fetch_page_text(url)
 
+    async def load_references(urls: list[str]):
+        outcome = await web.fetch_urls(urls)
+        return outcome.refs, outcome.skipped
+
     return PipelineDeps(
         recorder=recorder,
         researcher=make_researcher(web, docs, entities),
+        references=load_references,
         synthesize=synthesize,
         write=make_write_stage(make_llm_generator()),
         fact_check=make_fact_check_stage(refetch=refetch),

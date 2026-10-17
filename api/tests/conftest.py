@@ -4,10 +4,11 @@ from sqlalchemy.orm import sessionmaker
 
 import db.models  # noqa: F401
 from db.session import Base, make_engine
-from deps import get_deps_factory, get_pdf_fetcher, get_session_factory, get_upload_dir
+from deps import get_deps_factory, get_pdf_fetcher, get_retention, get_session_factory, get_upload_dir
 from errors import ApiError
 from main import app
 from tests.fake_pipeline import make_deps_factory
+from tests.test_fact_checker import EMB
 
 
 async def fake_fetch_pdf(url: str) -> bytes:
@@ -34,6 +35,18 @@ def pinned_settings(monkeypatch):
     get_settings.cache_clear()
 
 
+def make_retention(sf, tmp_path, **kw):
+    """Retention wired to the test's own folders, in-memory Qdrant and a deterministic embedder."""
+    from qdrant_client import QdrantClient
+
+    from context.scratch_store import ScratchStore
+    from context.vector_store import VectorStore
+    from services.retention import Retention
+
+    vectors = VectorStore(QdrantClient(":memory:"), EMB)
+    return Retention(sf, ScratchStore(tmp_path / "scratch"), tmp_path / "uploads", vectors, lambda: EMB, **kw)
+
+
 class Api:
     def __init__(self, client, session_factory, tmp_path):
         self.client, self.sf, self.tmp_path = client, session_factory, tmp_path
@@ -51,6 +64,7 @@ class Api:
 def api(tmp_path, monkeypatch):
     monkeypatch.setattr("main.init_db", lambda: None)  # tests use their own database
     monkeypatch.setattr("main.build_scheduler", lambda: None)  # scheduler tests build their own
+    monkeypatch.setattr("main.startup_sweep", lambda: None)  # never touch the developer's data folders
     eng = make_engine(f"sqlite:///{(tmp_path / 'api.db').as_posix()}")
     Base.metadata.create_all(eng)
     sf = sessionmaker(bind=eng, expire_on_commit=False)
@@ -58,6 +72,7 @@ def api(tmp_path, monkeypatch):
     app.dependency_overrides[get_deps_factory] = lambda: make_deps_factory(tmp_path)
     app.dependency_overrides[get_pdf_fetcher] = lambda: fake_fetch_pdf
     app.dependency_overrides[get_upload_dir] = lambda: tmp_path / "uploads"
+    app.dependency_overrides[get_retention] = lambda: make_retention(sf, tmp_path)
     with TestClient(app, raise_server_exceptions=False) as client:
         yield Api(client, sf, tmp_path)
     app.dependency_overrides.clear()
