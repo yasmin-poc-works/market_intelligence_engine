@@ -2,7 +2,7 @@
 
 A multi-agent research platform. You submit a natural-language brief and receive a structured report in which every claim carries a citation, a confidence label and a fact-check result. Scheduled watchlist jobs re-run a topic and alert you when something material changes.
 
-**Status:** all backend phases, the frontend, the evaluation tooling and the sample briefs are built (tracked in [planning/task.md](planning/task.md)). The demo video and the public repository are still to do. Free-tier results are mixed and are reported as measured in [Evaluation](#evaluation).
+**Status:** all backend phases, the frontend, the evaluation tooling and the sample briefs are built (tracked in [planning/task.md](planning/task.md)). **Demo video:** [watch on YouTube](https://youtu.be/eSY4FOThyW4). Free-tier results are mixed and are reported as measured in [Evaluation](#evaluation).
 
 ## Contents
 
@@ -329,4 +329,4 @@ Groq (`gpt-oss-120b`) via `langchain-groq` · SerpAPI · DeepAgents (planner) ·
 - **Fact-checking depends on re-fetching.** Sites that block automated fetching count as unverified, and about one source in four could not be re-fetched in the analysis.
 - **Topic detection is a similarity guess.** See "Reuse and cleanup across runs". Set `REUSE_SOURCES=false` to turn reuse and the unrelated-topic cleanup off (the age-based sweep still applies).
 - **PDF export** uses core Latin-1 fonts, so non-Latin text becomes `?`.
-- **Not built:** LangSmith tracing and the other bonus items (see [planning/task.md](planning/task.md)); the public repository (the demo video is recorded; add its link here when published).
+- **Not built:** LangSmith tracing and the other bonus items (see [planning/task.md](planning/task.md)); the LinkedIn post.
